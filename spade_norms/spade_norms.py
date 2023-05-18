@@ -7,22 +7,17 @@ class NormativeMixin:
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
-    async def _hook_plugin_after_connection(self, *args, **kwargs):
-        try:
-            await super()._hook_plugin_after_connection(*args, **kwargs)
-        except AttributeError:
-            pass #logger.debug("_hook_plugin_after_connection is undefined")
         self.normative = NormativeComponent()
+        print('mixin Init')
 
 class NormativeComponent:
     def __init__(self):
         self.actions = {}
 
-    def perform(self, action: str, **kwargs):
+    def perform(self, action: str, *args, **kwargs):
         self.__check(action)
         try:
-            action_result = self.actions[action](**kwargs)
+            action_result = self.actions[action](*args,**kwargs)
             if action_result != None:
                 return action_result
         except Exception:
