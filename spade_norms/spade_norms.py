@@ -1,6 +1,7 @@
 from spade_norms.actions.normative_action import NormativeAction
 from .engines.norm_engine import NormativeEngine
 from .engines.reasoning_engine import NormativeReasoningEngine
+from spade.agent import Agent
 import traceback
 import logging
 import sys
@@ -9,11 +10,12 @@ class NormativeMixin:
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.normative = NormativeComponent()
+        self.normative = NormativeComponent(self)
 
 class NormativeComponent:
-    def __init__(self, normative_engine: NormativeEngine = None):
+    def __init__(self, agent: Agent, normative_engine: NormativeEngine = None):
         self.actions = {}
+        self.agent = agent
         self.normative_engine = normative_engine
         self.reasoning_engine = NormativeReasoningEngine()
 
@@ -25,12 +27,12 @@ class NormativeComponent:
         try:
             action = self.actions[action_name]
             if self.normative_engine != None:
-                normative_response = self.normative_engine.check_legislation(action, self)
+                normative_response = self.normative_engine.check_legislation(action, self.agent)
                 do_action = self.reasoning_engine.inference(normative_response)
             else:
                 do_action = True
             if do_action:
-                action_result = self.actions[action_name](*args,**kwargs)
+                action_result = self.actions[action_name].action_fn(*args,**kwargs)
                 if action_result != None:
                     return action_result
         except Exception:
@@ -59,5 +61,5 @@ class NormativeComponent:
             raise Exception('Action with name {} does not exist in action dict'.format(action_name))
         
     def add_action(self, action: NormativeAction):
-        self.actions[action.name] = action.action_fn
+        self.actions[action.name] = action
         
