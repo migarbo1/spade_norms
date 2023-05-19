@@ -5,7 +5,12 @@ from spade_norms.norms.norm_enums import NormType
 from spade.behaviour import CyclicBehaviour
 from spade_norms.norms.norm import Norm
 from spade.agent import Agent
+from enum import Enum
 import time
+import math
+
+class Domain(Enum):
+    NUMBERS=1
 
 def cyclic_print(agent):
     print('count: {}'.format(agent.counter))
@@ -13,6 +18,9 @@ def cyclic_print(agent):
 
 def no_even_nums_cond_fn(agent):
     return agent.counter % 2 == 0
+
+def no_three_multipliers_cond_fn(agent):
+    return agent.counter % 3 == 0
 
 class CyclicPrintBehaviour(CyclicBehaviour):
     async def run(self):
@@ -30,16 +38,17 @@ class PrinterAgent(NormativeMixin, Agent):
 
 if __name__ == '__main__':
     '''
-    Example about how norms affect normative agents' behaviour
+    More complex normative environment with violable norms and use of domain
     '''
     #1 create normative action
-    act = NormativeAction('print', cyclic_print)
+    act = NormativeAction('print', cyclic_print, Domain.NUMBERS)
 
     #2 create norm
-    no_even_nums = Norm('no-even-nums', NormType.PROHIBITION, no_even_nums_cond_fn)
+    no_even_nums = Norm('no-even-nums', NormType.PROHIBITION, no_even_nums_cond_fn, inviolable=False, domain=Domain.NUMBERS)
+    no_prime_nums = Norm('no-three-multipliers-nums', NormType.PROHIBITION, no_three_multipliers_cond_fn, inviolable=False, domain=Domain.NUMBERS)
 
     #3 create normative engine
-    normative_engine = NormativeEngine(norm = no_even_nums)
+    normative_engine = NormativeEngine(norm_list= [no_even_nums, no_prime_nums])
 
     #4 create agent with user, apssword and noramtive engine
     ag = PrinterAgent("migarbo1_printer@gtirouter.dsic.upv.es", "test")

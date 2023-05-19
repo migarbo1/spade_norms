@@ -23,6 +23,9 @@ class PrinterAgent(NormativeMixin, Agent):
         self.add_behaviour(CyclicPrintBehaviour())
 
 if __name__ == '__main__':
+    '''
+    Simple example of how to use the perform directive in normative agents
+    '''
     act = NormativeAction('print', cyclic_print)
     ag = PrinterAgent("migarbo1_printer@gtirouter.dsic.upv.es", "test") 
     ag.normative.add_action(act)
