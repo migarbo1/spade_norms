@@ -18,7 +18,7 @@ class NormativeReasoningEngine():
             return False
         
         if norm_response.responseType == NormativeActionStatus.MIXED:
-            return norm_response.total_reward > norm_response.total_penalty
+            return abs(norm_response.total_reward) > abs(norm_response.total_penalty) or random.random() > 0.65
 
         if norm_response.responseType == NormativeActionStatus.FORBIDDEN:
-            return random.random() > 0.9
+            return random.random() > 0.8
