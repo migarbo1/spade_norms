@@ -7,6 +7,10 @@ class NormativeReasoningEngine():
         pass
 
     def inference(norm_response: NormativeResponse):
+        '''
+        This function allows the agent to reason about whether to perform an action or not.
+        You can override this method to change this behaviour.
+        '''
         if norm_response.responseType == NormativeActionStatus.NOT_REGULATED or NormativeActionStatus.ALLOWED:
             print('Doing action because is not regulated or allowed')
             return True
