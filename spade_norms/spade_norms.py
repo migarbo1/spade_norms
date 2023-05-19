@@ -7,22 +7,28 @@ import sys
 
 class NormativeMixin:
 
-    def __init__(self, normative_engine: NormativeEngine,*args, **kwargs):
+    def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.normative = NormativeComponent(normative_engine)
+        self.normative = NormativeComponent()
 
 class NormativeComponent:
-    def __init__(self, normative_engine: NormativeEngine):
+    def __init__(self, normative_engine: NormativeEngine = None):
         self.actions = {}
         self.normative_engine = normative_engine
         self.reasoning_engine = NormativeReasoningEngine()
+
+    def set_normative_engine(self, normative_engine: NormativeEngine):
+        self.normative_engine = normative_engine
 
     def perform(self, action_name: str, *args, **kwargs):
         self.__check_exists(action_name)
         try:
             action = self.actions[action_name]
-            normative_response = self.normative_engine.check_legislation(action, self)
-            do_action = self.reasoning_engine.inference(normative_response)
+            if self.normative_engine != None:
+                normative_response = self.normative_engine.check_legislation(action, self)
+                do_action = self.reasoning_engine.inference(normative_response)
+            else:
+                do_action = True
             if do_action:
                 action_result = self.actions[action_name](*args,**kwargs)
                 if action_result != None:
@@ -35,8 +41,11 @@ class NormativeComponent:
         self.__check_exists(action_name)
         try:
             action = self.actions[action_name]
-            normative_response = self.normative_engine.check_legislation(action, self)
-            do_action = self.reasoning_engine.inference(normative_response)
+            if self.normative_engine != None:
+                normative_response = self.normative_engine.check_legislation(action, self)
+                do_action = self.reasoning_engine.inference(normative_response)
+            else:
+                do_action = True
             if do_action:
                 action_result = await self.actions[action_name].action_fn(**kwargs)
                 if action_result != None:
