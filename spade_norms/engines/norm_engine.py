@@ -41,14 +41,14 @@ class NormativeEngine():
         This method checks the current norm database and for a given action returns if it is allowed or not in the form of a `NormativeResponse` object
         '''
         domain = action.domain if action.domain != None else 0
-        normative_response = NormativeResponse()
+        normative_response = NormativeResponse(action=action)
         if self.norm_db.get(domain, None) == None:
             normative_response.responseType = NormativeActionStatus.NOT_REGULATED
             return normative_response
         
         related_norms = self.norm_db[domain]
         for norm in related_norms:
-            forbidden = norm.condition_fn(agent)
+            forbidden = norm.condition_fn(agent) # -> hacer que reciba un enum (alow, forbidden)
             if forbidden:
                 normative_response.add_forbidding_norm(norm)
             else:

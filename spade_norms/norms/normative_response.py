@@ -1,10 +1,13 @@
 from .norm_enums import NormativeActionStatus
 from .norm import Norm
+from ..actions.normative_action import NormativeAction
 
 class NormativeResponse():
-    def __init__(self, responseType: NormativeActionStatus = None, norms_allowing: list = None, norms_forbidding : list = None
+    def __init__(self, action: NormativeAction = None, responseType: NormativeActionStatus = None, norms_allowing: list = None, norms_forbidding : list = None
                 , total_reward:float = 0.0, total_penalty: float = 0.0):
+        self.action = action
         self.responseType = responseType
+        # normas que cumples o no cumples -> cambiar naming
         self.norms_allowing = norms_allowing if norms_allowing != None else [] 
         self.norms_forbidding = norms_forbidding if norms_forbidding != None else [] 
         self.total_reward = total_reward
