@@ -16,7 +16,7 @@ def no_even_nums_cond_fn(agent):
 
 class CyclicPrintBehaviour(CyclicBehaviour):
     async def run(self):
-        self.agent.normative.perform('print', self.agent)
+        self.agent.normative.perform('print')
         self.agent.counter += 1
 
 class PrinterAgent(NormativeMixin, Agent):

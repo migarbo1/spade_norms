@@ -11,7 +11,7 @@ def cyclic_print(agent):
 
 class CyclicPrintBehaviour(CyclicBehaviour):
     async def run(self):
-        self.agent.normative.perform('print', self.agent)
+        self.agent.normative.perform('print')
 
 class PrinterAgent(NormativeMixin, Agent):
 
