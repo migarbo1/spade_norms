@@ -1,7 +1,7 @@
+from spade_norms.norms.norm_enums import NormType, NormativeActionStatus
 from spade_norms.actions.normative_action import NormativeAction
 from spade_norms.engines.norm_engine import NormativeEngine 
 from spade_norms.spade_norms import NormativeMixin
-from spade_norms.norms.norm_enums import NormType
 from spade.behaviour import CyclicBehaviour
 from spade_norms.norms.norm import Norm
 from spade.agent import Agent
@@ -12,7 +12,10 @@ def cyclic_print(agent):
     time.sleep(2)
 
 def no_even_nums_cond_fn(agent):
-    return agent.counter % 2 == 0
+    if agent.counter % 2 == 0: 
+        return NormativeActionStatus.FORBIDDEN
+    
+    return NormativeActionStatus.ALLOWED
 
 class CyclicPrintBehaviour(CyclicBehaviour):
     async def run(self):

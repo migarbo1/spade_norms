@@ -48,10 +48,13 @@ class NormativeEngine():
         
         related_norms = self.norm_db[domain]
         for norm in related_norms:
-            forbidden = norm.condition_fn(agent) # -> hacer que reciba un enum (alow, forbidden)
-            if forbidden:
+            cond_result = norm.condition_fn(agent)
+            assert isinstance(cond_result, NormativeActionStatus)
+            
+            if cond_result == NormativeActionStatus.FORBIDDEN:
                 normative_response.add_forbidding_norm(norm)
-            else:
+
+            if cond_result == NormativeActionStatus.ALLOWED:
                 normative_response.add_allowing_norm(norm)
         
         return normative_response
