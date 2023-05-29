@@ -7,7 +7,6 @@ from spade_norms.norms.norm import Norm
 from spade.agent import Agent
 from enum import Enum
 import time
-import math
 
 class Domain(Enum):
     NUMBERS=1

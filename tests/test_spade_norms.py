@@ -7,6 +7,8 @@ import pytest
 
 from spade_norms import spade_norms
 
+#Factory_boy
+#conftest.py -> te permite definir fixtures (parametros a pasarle alos test si te hace falta) 
 
 @pytest.fixture
 def response():
