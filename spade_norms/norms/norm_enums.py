@@ -19,3 +19,8 @@ class NormativeActionStatus(Enum):
     FORBIDDEN = 2
     MIXED = 3
     INVIOLABLE = 100
+
+class NormIssuer(Enum):
+    SELF = 0
+    SOCIETY = 1
+    ORGANIZATION = 2
