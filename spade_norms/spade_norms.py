@@ -2,14 +2,16 @@ from spade_norms.actions.normative_action import NormativeAction
 from .engines.norm_engine import NormativeEngine
 from .engines.reasoning_engine import NormativeReasoningEngine
 from spade.agent import Agent
+from enum import Enum
 import traceback
 import logging
 import sys
 
 class NormativeMixin:
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, role: Enum = None,**kwargs):
         super().__init__(*args, **kwargs)
+        self.role = role
         self.normative = NormativeComponent(self)
 
 class NormativeComponent:

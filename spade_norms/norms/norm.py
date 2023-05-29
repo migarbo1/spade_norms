@@ -6,7 +6,7 @@ from typing import Callable
 
 class Norm():
     def __init__(self ,name: str, norm_type: NormType, condition_fn: Callable, activation_fn: Callable = None, 
-                is_active: bool = True, reward: float = 1.0, penalty: float = -1.0, role: Enum = None, 
+                is_active: bool = True, reward: float = 1.0, penalty: float = -1.0, roles: list = None, 
                 domain: Enum = None, affected_actions: list = [], inviolable: bool = True, 
                 issuer: NormIssuer = None):
         self.name = name
@@ -16,7 +16,7 @@ class Norm():
         #self.is_active = is_active
         self.reward = reward
         self.penalty = penalty
-        #self.role = role
+        self.roles = roles
         self.domain = domain
         #self.affected_actions = affected_actions
         self.inviolable = inviolable
