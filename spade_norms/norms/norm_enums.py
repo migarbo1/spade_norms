@@ -17,7 +17,6 @@ class NormativeActionStatus(Enum):
     NOT_REGULATED = 0
     ALLOWED = 1
     FORBIDDEN = 2
-    MIXED = 3
     INVIOLABLE = 100
 
 class NormIssuer(Enum):

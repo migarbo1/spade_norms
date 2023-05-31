@@ -16,9 +16,6 @@ class NormativeReasoningEngine():
         
         if norm_response.responseType == NormativeActionStatus.INVIOLABLE:
             return False
-        
-        if norm_response.responseType == NormativeActionStatus.MIXED:
-            return abs(norm_response.total_reward) > abs(norm_response.total_penalty)
 
         if norm_response.responseType == NormativeActionStatus.FORBIDDEN:
             return False

@@ -15,9 +15,8 @@ class NormativeResponse():
     def add_allowing_norm(self, norm: Norm):
         '''
         Adds a new norm to the response list, updates rewards and computes the response type enum.
-        - if no norm has been processed or current status is ALLOWED, status will be ALLOWED.
-        - if there has been at least one norm violated, then status will be MIXED
-        - if there has been a forbidden state for an INVIOLABLE norm, status will remain the same.
+        - if no norm has been processed or current status is `ALLOWED`, status will be `ALLOWED`.
+        - For any other case, the status will remain the same. I.e: if its `FORBIDDEN` or `INVIOLABLE`
         '''
         self.norms_following.append(norm)
         self.total_reward += norm.reward
@@ -25,29 +24,20 @@ class NormativeResponse():
         if self.responseType == None or self.responseType == NormativeActionStatus.ALLOWED or self.responseType == NormativeActionStatus.NOT_REGULATED:
             self.responseType = NormativeActionStatus.ALLOWED
 
-        elif self.responseType == NormativeActionStatus.MIXED or self.responseType == NormativeActionStatus.FORBIDDEN:
-            self.responseType = NormativeActionStatus.MIXED
-        else:
-            self.responseType = NormativeActionStatus.INVIOLABLE
-
     def add_forbidding_norm(self, norm: Norm):
         '''
         Adds a new norm to the response list and computes the response type enum.
+        - if there has been a forbidden state for an inviolable norm, status will remain `INVIOLABLE`.
         - if no norm has been processed or current status is FORBIDDEN, status will be FORBIDDEN.
-        - if there has been at least one norm allowed, then status will be MIXED
-        - if there has been a forbidden state for an inviolable norm, status will remain the same.
         '''
         self.norms_breaking.append(norm)
         self.total_penalty += norm.penalty
 
-        if norm.inviolable:
+        if norm.inviolable or self.responseType == NormativeActionStatus.INVIOLABLE:
             self.responseType = NormativeActionStatus.INVIOLABLE
-
-        if self.responseType == None or self.responseType == NormativeActionStatus.FORBIDDEN or self.responseType == NormativeActionStatus.NOT_REGULATED:
+        else: # if None, Forbidden or allowed
             self.responseType = NormativeActionStatus.FORBIDDEN
-            
-        elif self.responseType == NormativeActionStatus.MIXED or self.responseType == NormativeActionStatus.ALLOWED:
-            self.responseType = NormativeActionStatus.MIXED
+
 
     def __str__(self):
         return '{' +  '\tresponse type: {},\n\norms_complying: {},\n\norms_breaking: {},\n\ttotal_reward: {},\n\ttotal_penalty: {}'.format(self.responseType, self.norms_following, self.norms_breaking, self.total_reward, self.total_penalty)  + '}'

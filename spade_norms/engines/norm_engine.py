@@ -47,7 +47,7 @@ class NormativeEngine():
             return normative_response
         
         related_norms = self.norm_db[domain]
-        related_norms = self.filter_norms_by_role(related_norms, agent.role)
+        related_norms = filter_norms_by_role(related_norms, agent.role)
         for norm in related_norms:
             cond_result = norm.condition_fn(agent)
             assert isinstance(cond_result, NormativeActionStatus)
@@ -60,13 +60,13 @@ class NormativeEngine():
         
         return normative_response
 
-    def filter_norms_by_role(norm_list, role) -> bool: 
-        '''
-        Receives a `list of norms` and a `role`. 
-        Returns the sublist of norms that have the given `role` inside the affected roles list 
-        '''
-        relevant_norms_for_role = []
-        for norm in norm_list:
-            if norm.roles == None or role in norm.roles:
-                relevant_norms_for_role.append(norm)
-        return relevant_norms_for_role
+def filter_norms_by_role(norm_list, role) -> bool: 
+    '''
+    Receives a `list of norms` and a `role`. 
+    Returns the sublist of norms that have the given `role` inside the affected roles list 
+    '''
+    relevant_norms_for_role = []
+    for norm in norm_list:
+        if norm.roles == None or role in norm.roles:
+            relevant_norms_for_role.append(norm)
+    return relevant_norms_for_role
