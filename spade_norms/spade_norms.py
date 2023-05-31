@@ -9,19 +9,29 @@ import sys
 
 class NormativeMixin:
 
-    def __init__(self, *args, role: Enum = None,**kwargs):
+    def __init__(self, *args, role: Enum = None, normative_engine: NormativeEngine = None, reasoning_engine: NormativeReasoningEngine = None, actions: list = [],**kwargs):
         super().__init__(*args, **kwargs)
         self.role = role
-        self.normative = NormativeComponent(self)
+        self.normative = NormativeComponent(self, normative_engine, reasoning_engine, actions)
 
 class NormativeComponent:
-    def __init__(self, agent: Agent, normative_engine: NormativeEngine = None, reasoning_engine: NormativeReasoningEngine = None):
-        self.actions = {}
+    def __init__(self, agent: Agent, normative_engine: NormativeEngine, reasoning_engine: NormativeReasoningEngine, actions: list = []):
+        '''
+        Creates a normative agent given a `NormativeEngine` and a `NormativeReasoningEngine`. If no `NormativeReasoningEngine` is provided the default is used.
+        User can pass also the agent's actions. 
+        '''
         self.agent = agent
         self.normative_engine = normative_engine
         self.reasoning_engine = NormativeReasoningEngine() if reasoning_engine == None else reasoning_engine
+        
+        self.actions = {}
+        if len(actions) > 0:
+            self.add_multiple_actions(actions)
 
     def set_normative_engine(self, normative_engine: NormativeEngine):
+        '''
+        Overrides the agent's actual normative engine
+        '''
         self.normative_engine = normative_engine
 
     def perform(self, action_name: str, *args, **kwargs):
@@ -70,4 +80,12 @@ class NormativeComponent:
         
     def add_action(self, action: NormativeAction):
         self.actions[action.name] = action
+    
+    def delete_action(self, action: NormativeAction):
+        self.__check_exists(action_name=action.name)
+        self.actions.pop(action.name)
+
+    def add_multiple_actions(self, action_list: list):
+        for action in action_list:
+            self.add_action(action)
         
