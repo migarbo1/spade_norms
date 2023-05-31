@@ -11,6 +11,10 @@ import time
 class Domain(Enum):
     NUMBERS=1
 
+class Role(Enum):
+    EVEN_HATER = 0
+    THREE_HATER = 1
+
 def cyclic_print(agent):
     print('count: {}'.format(agent.counter))
     time.sleep(2)
@@ -49,14 +53,14 @@ if __name__ == '__main__':
     act = NormativeAction('print', cyclic_print, Domain.NUMBERS)
 
     #2 create norm
-    no_even_nums = Norm('no-even-nums', NormType.PROHIBITION, no_even_nums_cond_fn, inviolable=False, domain=Domain.NUMBERS)
-    no_prime_nums = Norm('no-three-multipliers-nums', NormType.PROHIBITION, no_three_multipliers_cond_fn, inviolable=False, domain=Domain.NUMBERS)
+    no_even_nums = Norm('no-even-nums', NormType.PROHIBITION, no_even_nums_cond_fn, inviolable=False, domain=Domain.NUMBERS, roles=[Role.EVEN_HATER])
+    no_prime_nums = Norm('no-three-multipliers-nums', NormType.PROHIBITION, no_three_multipliers_cond_fn, inviolable=False, domain=Domain.NUMBERS, roles=[Role.EVEN_HATER, Role.THREE_HATER])
 
     #3 create normative engine
     normative_engine = NormativeEngine(norm_list= [no_even_nums, no_prime_nums])
 
     #4 create agent with user, apssword and noramtive engine
-    ag = PrinterAgent("migarbo1_printer@gtirouter.dsic.upv.es", "test")
+    ag = PrinterAgent("migarbo1_printer@gtirouter.dsic.upv.es", "test", role = Role.THREE_HATER)
     ag.normative.set_normative_engine(normative_engine)
     
     #5 add action to agent
