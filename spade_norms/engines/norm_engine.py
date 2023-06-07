@@ -50,7 +50,7 @@ class NormativeEngine():
     def delete_norm(self, norm: Norm) -> bool:
         pass
 
-    def check_legislation(self, action: NormativeAction, agent: Agent, concerns: dict) -> NormativeResponse:
+    def check_legislation(self, action: NormativeAction, agent: Agent) -> NormativeResponse:
         '''
         This method checks the current norm database and for a given action returns if it is allowed or not in the form of a `NormativeResponse` object
         '''
@@ -60,7 +60,7 @@ class NormativeEngine():
             normative_response.responseType = NormativeActionStatus.NOT_REGULATED
             return normative_response
         
-        related_norms = self.get_appliable_norms(domain, agent, concerns)
+        related_norms = self.get_appliable_norms(domain, agent)
         for norm in related_norms:
             cond_result = norm.condition_fn(agent)
             assert isinstance(cond_result, NormativeActionStatus)
@@ -73,12 +73,12 @@ class NormativeEngine():
         
         return normative_response
     
-    def get_appliable_norms(self, domain: Enum, agent: Agent, concerns: dict) -> list:
+    def get_appliable_norms(self, domain: Enum, agent: Agent) -> list:
         '''
         This method receives a `domain` and an `agent` and returns the norms that could apply for it 
         '''
         related_norms = self.norm_db.get(domain, [])
-        related_norms = join_norms_and_concerns(related_norms, concerns, domain)
+        related_norms = join_norms_and_concerns(related_norms, agent, domain)
         related_norms = filter_norms_by_role(related_norms, agent.role)
 
         return related_norms
@@ -94,9 +94,9 @@ def filter_norms_by_role(norm_list, role) -> bool:
             relevant_norms_for_role.append(norm)
     return relevant_norms_for_role
 
-def join_norms_and_concerns(norms: list, concerns: dict, domain:Enum):
+def join_norms_and_concerns(norms: list, agent: Agent, domain:Enum):
     '''
     Receives as input the organization norms and the agent concerns
     Returns the concatenation of both lists 
     '''
-    return norms + concerns.get(domain, [])
+    return norms + agent.normative.concerns.get(domain, [])

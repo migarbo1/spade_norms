@@ -40,7 +40,7 @@ class NormativeComponent:
         self.__check_exists(action_name)
         action = self.actions[action_name]
         if self.normative_engine != None:
-            normative_response = self.normative_engine.check_legislation(action, self.agent, self.concerns)
+            normative_response = self.normative_engine.check_legislation(action, self.agent)
             do_action = self.reasoning_engine.inference(normative_response)
         else:
             do_action = True
@@ -60,7 +60,7 @@ class NormativeComponent:
         self.__check_exists(action_name)
         action = self.actions[action_name]
         if self.normative_engine != None:
-            normative_response = self.normative_engine.check_legislation(action, self.agent, self.concerns)
+            normative_response = self.normative_engine.check_legislation(action, self.agent)
             do_action = self.reasoning_engine.inference(normative_response)
         else:
             do_action = True
