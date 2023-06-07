@@ -36,6 +36,16 @@ class NormativeEngine():
             self.norm_db[domain] = []
         self.norm_db[domain].append(norm)
 
+    def contains_norm(self, in_norm: Norm)-> bool:
+        '''
+        searches in the norm db for a norm. Returns `True` if found, `Else` otherwise
+        '''
+        for domain in self.norm_db.keys():
+            for local_norm in self.norm_db[domain]:
+                if in_norm == local_norm:
+                    return True
+        return False
+
     def check_legislation(self, action: NormativeAction, agent: Agent) -> NormativeResponse:
         '''
         This method checks the current norm database and for a given action returns if it is allowed or not in the form of a `NormativeResponse` object
