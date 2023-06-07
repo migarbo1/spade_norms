@@ -13,6 +13,9 @@ import time
 # create class wich inherits from NormativeReasoningEngine and override inference method.
 class RecklessReasoningEngine(NormativeReasoningEngine):
     def inference(self, norm_response: NormativeResponse):
+        '''
+        this method overrides the previous inference behaviour and returns exactly the oposite.
+        '''
         if norm_response.responseType == NormativeActionStatus.NOT_REGULATED or norm_response.responseType == NormativeActionStatus.ALLOWED:
             return False
         
