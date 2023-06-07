@@ -45,6 +45,10 @@ class NormativeEngine():
                 if in_norm == local_norm:
                     return True
         return False
+    
+    #TODO
+    def delete_norm(self, norm: Norm) -> bool:
+        pass
 
     def check_legislation(self, action: NormativeAction, agent: Agent) -> NormativeResponse:
         '''
@@ -56,8 +60,7 @@ class NormativeEngine():
             normative_response.responseType = NormativeActionStatus.NOT_REGULATED
             return normative_response
         
-        related_norms = self.norm_db[domain]
-        related_norms = filter_norms_by_role(related_norms, agent.role)
+        related_norms = self.get_appliable_norms(domain, agent)
         for norm in related_norms:
             cond_result = norm.condition_fn(agent)
             assert isinstance(cond_result, NormativeActionStatus)
@@ -69,6 +72,16 @@ class NormativeEngine():
                 normative_response.add_allowing_norm(norm)
         
         return normative_response
+    
+    def get_appliable_norms(self, domain: Enum, agent: Agent) -> list:
+        '''
+        This method receives a `domain` and an `agent` and returns the norms that could apply for it 
+        '''
+        related_norms = self.norm_db.get(domain, [])
+        related_norms = join_norms_and_concerns(related_norms, agent, domain)
+        related_norms = filter_norms_by_role(related_norms, agent.role)
+
+        return related_norms
 
 def filter_norms_by_role(norm_list, role) -> bool: 
     '''
@@ -80,3 +93,10 @@ def filter_norms_by_role(norm_list, role) -> bool:
         if norm.roles == None or role in norm.roles:
             relevant_norms_for_role.append(norm)
     return relevant_norms_for_role
+
+def join_norms_and_concerns(norms: list, agent: Agent, domain:Enum):
+    '''
+    Receives as input the organization norms and the agent concerns
+    Returns the concatenation of both lists 
+    '''
+    return norms + agent.normative.concerns.get(domain, [])
