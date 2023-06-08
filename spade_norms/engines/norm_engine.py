@@ -29,15 +29,15 @@ class NormativeEngine():
         return norm_utils.contains(self.norm_db, in_norm)
     
     #TODO
-    def delete_norm(self, norm: Norm) -> bool:
-        self.norm_db = norm_utils.delete(self.norm_db, norm)
+    def remove_norm(self, norm: Norm) -> bool:
+        self.norm_db = norm_utils.remove(self.norm_db, norm)
 
     def check_legislation(self, action: NormativeAction, agent: Agent) -> NormativeResponse:
         '''
         This method checks the current norm database and for a given action returns if it is allowed or not in the form of a `NormativeResponse` object
         '''
         domain = action.domain if action.domain != None else 0
-        normative_response = NormativeResponse(action=action)
+        normative_response = NormativeResponse(action=action, responseType=NormativeActionStatus.NOT_REGULATED)
         if self.norm_db.get(domain, None) == None:
             normative_response.responseType = NormativeActionStatus.NOT_REGULATED
             return normative_response
