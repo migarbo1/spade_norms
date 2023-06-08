@@ -28,7 +28,6 @@ class NormativeEngine():
     def contains_norm(self, in_norm: Norm)-> bool:
         return norm_utils.contains(self.norm_db, in_norm)
     
-    #TODO
     def remove_norm(self, norm: Norm) -> bool:
         self.norm_db = norm_utils.remove(self.norm_db, norm)
 

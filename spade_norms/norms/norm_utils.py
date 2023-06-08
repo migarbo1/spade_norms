@@ -32,7 +32,6 @@ def contains(norm_or_concern_db: dict, norm_or_concern: Norm) -> bool:
                 return True
     return False
 
-#TODO
 def remove(norm_or_concern_db: dict, norm_or_concern: Norm) -> dict:
     '''
         Removes a norm or a concern from the given database.

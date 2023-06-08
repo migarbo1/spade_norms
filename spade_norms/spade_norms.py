@@ -100,6 +100,5 @@ class NormativeComponent:
     def contains_concern(self, concern: Norm) -> bool:
         return norm_utils.contains(self.concerns, concern)
 
-    #TODO
     def remove_concern(self, concern: Norm) -> bool:
         self.concerns = norm_utils.remove(self.concerns, concern)
