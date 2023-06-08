@@ -13,7 +13,6 @@ class Domain(Enum):
 
 def cyclic_print(agent):
     print('count: {}'.format(agent.counter))
-    time.sleep(2)
 
 def no_even_nums_cond_fn(agent):
     if agent.counter % 2 == 0: 
@@ -30,6 +29,7 @@ def no_three_multipliers_cond_fn(agent):
 class CyclicPrintBehaviour(CyclicBehaviour):
     async def run(self):
         self.agent.normative.perform('print')
+        time.sleep(2)
         self.agent.counter += 1
         no_three_mul_nums = Norm('no-three-multipliers-nums', NormType.PROHIBITION, no_three_multipliers_cond_fn, inviolable=False, domain=Domain.NUMBERS)
         if self.agent.counter > 6 and not normative_engine.contains_norm(no_three_mul_nums):
@@ -69,17 +69,12 @@ if __name__ == '__main__':
     #6 start agent
     ag.start()
     time.sleep(3)
-    i = 0
     while ag.is_alive():
         try:
             time.sleep(1)
-            if i > 3 and not normative_engine.contains_norm(no_even_nums):
+            if ag.counter > 3 and not normative_engine.contains_norm(no_even_nums):
                 normative_engine.add_norm(no_even_nums)
                 print('no_even_nums norm added')
-            #if i > 6 and not normative_engine.contains_norm(no_three_mul_nums):
-            #    normative_engine.add_norm(no_three_mul_nums)
-            #    print('no_three_mul_nums norm added')
-            i += 1
             print(normative_engine.norm_db)
         except KeyboardInterrupt:
             ag.stop()            

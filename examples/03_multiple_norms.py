@@ -13,7 +13,6 @@ class Domain(Enum):
 
 def cyclic_print(agent):
     print('count: {}'.format(agent.counter))
-    time.sleep(2)
 
 def no_even_nums_cond_fn(agent):
     if agent.counter % 2 == 0: 
@@ -30,6 +29,7 @@ def no_three_multipliers_cond_fn(agent):
 class CyclicPrintBehaviour(CyclicBehaviour):
     async def run(self):
         self.agent.normative.perform('print')
+        time.sleep(2)
         self.agent.counter += 1
 
 class PrinterAgent(NormativeMixin, Agent):

@@ -6,12 +6,12 @@ import time
 
 def cyclic_print(agent):
     print('count: {}'.format(agent.counter))
-    agent.counter += 1
-    time.sleep(2)
 
 class CyclicPrintBehaviour(CyclicBehaviour):
     async def run(self):
         self.agent.normative.perform('print')
+        time.sleep(2)
+        self.agent.counter += 1
 
 class PrinterAgent(NormativeMixin, Agent):
 
