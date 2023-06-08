@@ -2,6 +2,7 @@ from .engines.reasoning_engine import NormativeReasoningEngine
 from .actions.normative_action import NormativeAction
 from .engines.norm_engine import NormativeEngine
 from .norms.norm import Norm
+from .norms import norm_utils
 from spade.agent import Agent
 from enum import Enum
 import traceback
@@ -91,22 +92,14 @@ class NormativeComponent:
         self.actions.pop(action.name)
 
     def add_concern(self, concern: Norm):
-        domain = concern.domain if concern.domain != None else 0
-        if self.concerns.get(domain, None) == None:
-            self.concerns[domain] = []
-        self.concerns[domain].append(concern)
+        self.concerns = norm_utils.add_single(self.concerns, concern)
 
     def add_concerns(self, concern_list: list):
-        for concern in concern_list:
-            self.add_concern(concern)
+        self.concerns = norm_utils.add_multiple(self.concerns, concern_list)
 
     def contains_concern(self, concern: Norm) -> bool:
-        for domain in self.concerns.keys():
-            for local_concern in self.concerns[domain]:
-                if concern == local_concern:
-                    return True
-        return False
+        return norm_utils.contains(self.concerns, concern)
 
     #TODO
     def delete_concern(self, concern: Norm) -> bool:
-        pass
+        self.concerns = norm_utils.delete(self.concerns, concern)

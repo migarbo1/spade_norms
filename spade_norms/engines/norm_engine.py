@@ -7,6 +7,7 @@ from ..actions.normative_action import NormativeAction
 from ..norms.normative_response import NormativeResponse
 from ..norms.norm_enums import *
 from ..norms.norm import Norm
+from ..norms import norm_utils 
 from spade.agent import Agent
 
 class NormativeEngine():
@@ -19,36 +20,17 @@ class NormativeEngine():
             self.add_norm(norm)
 
     def add_norms(self, norms: list):
-        '''
-        Adds a list of norms to the normative database. Norms are indexed by domain, 
-        if no domain is provided on the actions, a base one is assumed. Althoug is highly recommended to provide it. 
-        '''
-        for norm in norms:
-            self.add_norm(norm)
+        self.norm_db = norm_utils.add_multiple(self.norm_db, norms)
     
     def add_norm(self, norm: Norm):
-        '''
-        Adds a single norm to the normative database. Norms are indexed by domain, 
-        if no domain is provided on the actions, a base one is assumed. Althoug is highly recommended to provide it. 
-        '''
-        domain = norm.domain if norm.domain != None else 0
-        if self.norm_db.get(domain, None) == None:
-            self.norm_db[domain] = []
-        self.norm_db[domain].append(norm)
+        self.norm_db = norm_utils.add_single(self.norm_db, norm)
 
     def contains_norm(self, in_norm: Norm)-> bool:
-        '''
-        searches in the norm db for a norm. Returns `True` if found, `Else` otherwise
-        '''
-        for domain in self.norm_db.keys():
-            for local_norm in self.norm_db[domain]:
-                if in_norm == local_norm:
-                    return True
-        return False
+        return norm_utils.contains(self.norm_db, in_norm)
     
     #TODO
     def delete_norm(self, norm: Norm) -> bool:
-        pass
+        self.norm_db = norm_utils.delete(self.norm_db, norm)
 
     def check_legislation(self, action: NormativeAction, agent: Agent) -> NormativeResponse:
         '''
@@ -78,25 +60,7 @@ class NormativeEngine():
         This method receives a `domain` and an `agent` and returns the norms that could apply for it 
         '''
         related_norms = self.norm_db.get(domain, [])
-        related_norms = join_norms_and_concerns(related_norms, agent, domain)
-        related_norms = filter_norms_by_role(related_norms, agent.role)
+        related_norms = norm_utils.join_norms_and_concerns(related_norms, agent, domain)
+        related_norms = norm_utils.filter_norms_by_role(related_norms, agent.role)
 
         return related_norms
-
-def filter_norms_by_role(norm_list, role) -> bool: 
-    '''
-    Receives a `list of norms` and a `role`. 
-    Returns the sublist of norms that have the given `role` inside the affected roles list 
-    '''
-    relevant_norms_for_role = []
-    for norm in norm_list:
-        if norm.roles == None or role in norm.roles:
-            relevant_norms_for_role.append(norm)
-    return relevant_norms_for_role
-
-def join_norms_and_concerns(norms: list, agent: Agent, domain:Enum):
-    '''
-    Receives as input the organization norms and the agent concerns
-    Returns the concatenation of both lists 
-    '''
-    return norms + agent.normative.concerns.get(domain, [])
