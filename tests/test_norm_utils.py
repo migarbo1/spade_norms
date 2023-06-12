@@ -1,6 +1,7 @@
 from spade_norms.norms.norm import Norm
 from spade_norms.norms.norm_enums import *
 from spade_norms.norms.norm_utils import * 
+import pytest
 
 class TestNormUtils:
 
@@ -21,6 +22,14 @@ class TestNormUtils:
         norm2 =  Norm('test2', NormType.PROHIBITION, lambda x : True)
         add_single(db, norm2)
         assert len(db[0]) == 2
+
+    def test_add_single_repeated_norm(self):
+        db = {}
+        norm =  Norm('test', NormType.PROHIBITION, lambda x : True)
+        add_single(db, norm)
+        assert len(db[0]) == 1
+        with pytest.raises(Exception):
+            add_single(db, norm)
 
     def test_add_single_different_domain(self):
         db = {}

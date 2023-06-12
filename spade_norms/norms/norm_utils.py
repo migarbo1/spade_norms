@@ -7,10 +7,12 @@ def add_single(norm_or_concern_db: dict, norm_or_concern: Norm) -> dict:
         Adds a single norm or concern to the input database. Norms are indexed by domain, 
         if no domain is provided, a base one is assumed. Althoug is highly recommended to provide it. 
     '''
-    domain = norm_or_concern.domain if norm_or_concern.domain != None else 0
-    if norm_or_concern_db.get(domain, None) == None:
-        norm_or_concern_db[domain] = []
-    norm_or_concern_db[domain].append(norm_or_concern)
+    if not contains(norm_or_concern_db, norm_or_concern):
+        if norm_or_concern_db.get(norm_or_concern.domain, None) == None:
+            norm_or_concern_db[norm_or_concern.domain] = []
+        norm_or_concern_db[norm_or_concern.domain].append(norm_or_concern)
+    else:
+        raise Exception('Norm or concern with name {} already exists in db'.format(norm_or_concern.name))
     return norm_or_concern_db
 
 def add_multiple(norm_or_concern_db: dict, norm_or_concern_list: list) -> dict:
