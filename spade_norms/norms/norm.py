@@ -4,8 +4,8 @@ from typing import Callable
 
 class Norm():
     def __init__(self ,name: str, norm_type: NormType, condition_fn: Callable, activation_fn: Callable = None, 
-                is_active: bool = True, reward: float = 1.0, penalty: float = -1.0, roles: list = None, 
-                domain: Enum = None, inviolable: bool = True, issuer: NormIssuer = None):
+                is_active: bool = True, reward: float = 1.0, penalty: float = -1.0, roles: list = [], 
+                domain: Enum = 0, inviolable: bool = True, issuer: NormIssuer = None):
         self.name = name
         self.norm_type = norm_type
         self.condition_fn = condition_fn
