@@ -58,7 +58,7 @@ def filter_norms_by_role(norm_list: list, role: Enum) -> list:
     '''
     relevant_norms_for_role = []
     for norm in norm_list:
-        if norm.roles == None or role in norm.roles:
+        if norm.roles == [] or role in norm.roles:
             relevant_norms_for_role.append(norm)
     return relevant_norms_for_role
 
