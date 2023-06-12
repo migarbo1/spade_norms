@@ -44,10 +44,10 @@ def remove(norm_or_concern_db: dict, norm_or_concern: Norm) -> dict:
                 break
     return norm_or_concern_db
 
-def filter_norms_by_role(norm_list, role) -> bool: 
+def filter_norms_by_role(norm_list: list, role: Enum) -> list: 
     '''
     Receives a `list of norms` and a `role`. 
-    Returns the sublist of norms that have the given `role` inside the affected roles list 
+    Returns the sublist of norms that have no role or the given `role` inside the affected roles list 
     '''
     relevant_norms_for_role = []
     for norm in norm_list:
@@ -55,9 +55,9 @@ def filter_norms_by_role(norm_list, role) -> bool:
             relevant_norms_for_role.append(norm)
     return relevant_norms_for_role
 
-def join_norms_and_concerns(norms: list, agent: Agent, domain:Enum) -> list:
+def join_norms_and_concerns(norms: list, concerns: list) -> list:
     '''
     Receives as input the organization norms and the agent concerns
     Returns the concatenation of both lists 
     '''
-    return norms + agent.normative.concerns.get(domain, [])
+    return norms + concerns

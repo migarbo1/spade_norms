@@ -59,7 +59,8 @@ class NormativeEngine():
         This method receives a `domain` and an `agent` and returns the norms that could apply for it 
         '''
         related_norms = self.norm_db.get(domain, [])
-        related_norms = norm_utils.join_norms_and_concerns(related_norms, agent, domain)
+        agent_concerns = agent.normative.concerns.get(domain, [])
+        related_norms = norm_utils.join_norms_and_concerns(related_norms, agent_concerns)
         related_norms = norm_utils.filter_norms_by_role(related_norms, agent.role)
 
         return related_norms
