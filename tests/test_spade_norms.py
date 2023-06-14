@@ -30,48 +30,4 @@ def test_content(response):
 #   __check_exists() -> raise exception when action not found. Nothing otherwise
 #   add_action() -> adds action if not there
 #   add_action() -> updates action if there
-#   
-# file: normative_response.py
-#   add_allowing_norm() -> if [] responsetype = allowed
-#   add_allowing_norm() -> if [ALLOWED] responsetype = allowed
-#   add_allowing_norm() -> if [FORBIDDEN] responsetype = forbidden
-#   add_allowing_norm() -> if [INVIOLABLE] responsetype = inviolable
-#   add_allowing_norm() -> if [] responsetype = allowed
-#   
-#   add_forbidding_norm() -> if [] responsetype = forbidden
-#   add_forbidding_norm() -> if [ALLOWED] responsetype = forbidden
-#   add_forbidding_norm() -> if [FORBIDDEN] responsetype = forbidden
-#   add_forbidding_norm() -> if [INVIOLABLE] responsetype = inviolable
-#
-#   add_allowing_norm(inviolable_norm) -> if [] responsetype = allowed
-#   add_allowing_norm(inviolable_norm) -> if [ALLOWED] responsetype = allowed
-#   add_allowing_norm(inviolable_norm) -> if [FORBIDDEN] responsetype = forbidden
-#   add_allowing_norm(inviolable_norm) -> if [INVIOLABLE] responsetype = inviolable
-#   add_allowing_norm(inviolable_norm) -> if [] responsetype = allowed
-#   
-#   add_forbidding_norm(inviolable_norm) -> if [] responsetype = forbidden
-#   add_forbidding_norm(inviolable_norm) -> if [ALLOWED] responsetype = forbidden
-#   add_forbidding_norm(inviolable_norm) -> if [FORBIDDEN] responsetype = forbidden
-#   add_forbidding_norm(inviolable_norm) -> if [INVIOLABLE] responsetype = inviolable
-#
-# file: norm_engine.py
-#   add_norms() -> list of non domained actions - over empt dict
-#   add_norms() -> list of domained actions - over empt dict
-#   add_norms() -> list of domained and non domained actions - over empt dict
-#   add_norms() -> list of non domained actions - over existing dict
-#   add_norms() -> list of domained actions - over existing dict
-#   add_norms() -> list of domained and non domained actions - over existing dict
-#
-#   add_norm() -> no domain, no previous norm
-#   add_norm() -> no domain, previous norm withoud domain
-#   add_norm() -> no domain, previous norm with domain
-#   add_norm() -> domain, no previous norm
-#   add_norm() -> domain, previous norm withoud domain
-#   add_norm() -> domain, previous norm with domain
-#
-#   filter_norms_by_role() -> role= None
-#   filter_norms_by_role() -> norm_list = []
-#   filter_norms_by_role() -> role in norm_list
-#   filter_norms_by_role() -> role NOT in norm_list
-#
 #

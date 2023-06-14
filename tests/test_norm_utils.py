@@ -147,9 +147,16 @@ class TestNormUtils:
         role = 2
         assert len(filter_norms_by_role(norm_list, role)) == 0
 
+    def test_filter_norms_by_role_non_existing(self):
+        norm =  Norm('test', NormType.PROHIBITION, lambda x : True, roles=[])
+        norm2 =  Norm('test2', NormType.PROHIBITION, lambda x : True, roles=[])
+        norm_list = [norm, norm2]
+        role = None
+        assert len(filter_norms_by_role(norm_list, role)) == 2
+
     def test_filter_norms_by_role_none(self):
-        norm =  Norm('test', NormType.PROHIBITION, lambda x : True, roles=None)
-        norm2 =  Norm('test2', NormType.PROHIBITION, lambda x : True, roles=None)
+        norm =  Norm('test', NormType.PROHIBITION, lambda x : True, roles=[])
+        norm2 =  Norm('test2', NormType.PROHIBITION, lambda x : True, roles=[])
         norm_list = [norm, norm2]
         role = 1
         assert len(filter_norms_by_role(norm_list, role)) == 2
