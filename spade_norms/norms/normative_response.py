@@ -3,7 +3,7 @@ from .norm import Norm
 from ..actions.normative_action import NormativeAction
 
 class NormativeResponse():
-    def __init__(self, action: NormativeAction = None, responseType: NormativeActionStatus = None, norms_following: list = None, norms_breaking : list = None
+    def __init__(self, action: NormativeAction, responseType: NormativeActionStatus = NormativeActionStatus.NOT_REGULATED, norms_following: list = None, norms_breaking : list = None
                 , total_reward:float = 0.0, total_penalty: float = 0.0):
         self.action = action
         self.responseType = responseType
