@@ -35,20 +35,19 @@ class NormativeEngine():
         '''
         This method checks the current norm database and for a given action returns if it is allowed or not in the form of a `NormativeResponse` object
         '''
-        domain = action.domain if action.domain != None else 0
         normative_response = NormativeResponse(action=action, responseType=NormativeActionStatus.NOT_REGULATED)
         
-        appliable_norms = self.get_appliable_norms(domain, agent)
+        appliable_norms = self.get_appliable_norms(action.domain, agent)
 
         if len(appliable_norms) == 0:
-            normative_response.responseType = NormativeActionStatus.NOT_REGULATED
+            normative_response.response_type = NormativeActionStatus.NOT_REGULATED
             return normative_response
 
         for norm in appliable_norms:
             cond_result = norm.condition_fn(agent)
             assert isinstance(cond_result, NormativeActionStatus)
             
-            if cond_result == NormativeActionStatus.FORBIDDEN:
+            if cond_result == NormativeActionStatus.FORBIDDEN or cond_result == NormativeActionStatus.INVIOLABLE:
                 normative_response.add_forbidding_norm(norm)
 
             if cond_result == NormativeActionStatus.ALLOWED:

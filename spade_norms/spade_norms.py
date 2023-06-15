@@ -11,7 +11,7 @@ import sys
 
 class NormativeMixin:
 
-    def __init__(self, *args, role: Enum = None, normative_engine: NormativeEngine = None, reasoning_engine: NormativeReasoningEngine = None, actions: list = [], concerns: dict = {}, **kwargs):
+    def __init__(self, *args, role: Enum = 0, normative_engine: NormativeEngine = None, reasoning_engine: NormativeReasoningEngine = None, actions: list = [], concerns: dict = {}, **kwargs):
         super().__init__(*args, **kwargs)
         self.role = role
         self.normative = NormativeComponent(self, normative_engine, reasoning_engine, actions, concerns)
