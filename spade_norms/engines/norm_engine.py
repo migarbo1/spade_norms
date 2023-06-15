@@ -37,12 +37,14 @@ class NormativeEngine():
         '''
         domain = action.domain if action.domain != None else 0
         normative_response = NormativeResponse(action=action, responseType=NormativeActionStatus.NOT_REGULATED)
-        if self.norm_db.get(domain, None) == None:
+        
+        appliable_norms = self.get_appliable_norms(domain, agent)
+
+        if len(appliable_norms) == 0:
             normative_response.responseType = NormativeActionStatus.NOT_REGULATED
             return normative_response
-        
-        related_norms = self.get_appliable_norms(domain, agent)
-        for norm in related_norms:
+
+        for norm in appliable_norms:
             cond_result = norm.condition_fn(agent)
             assert isinstance(cond_result, NormativeActionStatus)
             
