@@ -16,13 +16,13 @@ class RecklessReasoningEngine(NormativeReasoningEngine):
         '''
         this method overrides the previous inference behaviour and returns exactly the oposite.
         '''
-        if norm_response.responseType == NormativeActionStatus.NOT_REGULATED or norm_response.responseType == NormativeActionStatus.ALLOWED:
+        if norm_response.response_type == NormativeActionStatus.NOT_REGULATED or norm_response.response_type == NormativeActionStatus.ALLOWED:
             return False
         
-        if norm_response.responseType == NormativeActionStatus.INVIOLABLE:
+        if norm_response.response_type == NormativeActionStatus.INVIOLABLE:
             return True
 
-        if norm_response.responseType == NormativeActionStatus.FORBIDDEN:
+        if norm_response.response_type == NormativeActionStatus.FORBIDDEN:
             return True
 
 class Domain(Enum):

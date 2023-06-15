@@ -11,11 +11,11 @@ class NormativeReasoningEngine():
         This function allows the agent to reason about whether to perform an action or not.
         You can override this method to change this behaviour.
         '''
-        if norm_response.responseType == NormativeActionStatus.NOT_REGULATED or norm_response.responseType == NormativeActionStatus.ALLOWED:
+        if norm_response.response_type == NormativeActionStatus.NOT_REGULATED or norm_response.response_type == NormativeActionStatus.ALLOWED:
             return True
         
-        if norm_response.responseType == NormativeActionStatus.INVIOLABLE:
+        if norm_response.response_type == NormativeActionStatus.INVIOLABLE:
             return False
 
-        if norm_response.responseType == NormativeActionStatus.FORBIDDEN:
+        if norm_response.response_type == NormativeActionStatus.FORBIDDEN:
             return False
