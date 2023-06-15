@@ -45,10 +45,9 @@ def remove(norm_or_concern_db: dict, norm_or_concern: Norm) -> dict:
                 norm_or_concern_db[norm_or_concern.domain].pop(idx)
                 
                 #Remove domain if there's no action left
-                if norm_or_concern_db.get(norm_or_concern.domain, None) != None:
+                if len(norm_or_concern_db[norm_or_concern.domain]) == 0:
                     norm_or_concern_db.pop(norm_or_concern.domain)
                 break
-
     return norm_or_concern_db
 
 def filter_norms_by_role(norm_list: list, role: Enum) -> list: 
