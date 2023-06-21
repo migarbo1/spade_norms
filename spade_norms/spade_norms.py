@@ -37,22 +37,7 @@ class NormativeComponent:
         '''
         self.normative_engine = normative_engine
 
-    def perform(self, action_name: str, *args, **kwargs):
-        self.__check_exists(action_name)
-        do_action = self.__normative_eval(action_name)
-        if do_action:
-            try:
-                action_result = self.actions[action_name].action_fn(self.agent, *args, **kwargs)
-                if action_result != None:
-                    return action_result
-            except Exception:
-                logging.error(traceback.format_exc())
-                print("Error performing action: ", sys.exc_info()[0])
-        else:
-            #TODO: proceeding for actions not performed
-            print("Action {} not performed due to normative constrictions".format(action_name))
-
-    async def performAsync(self, action_name: str, *args, **kwargs):
+    async def perform(self, action_name: str, *args, **kwargs):
         self.__check_exists(action_name)
         do_action = self.__normative_eval(action_name)
         if do_action:
