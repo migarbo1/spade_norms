@@ -5,9 +5,10 @@ from spade_norms.spade_norms import NormativeMixin
 from spade.behaviour import CyclicBehaviour
 from spade_norms.norms.norm import Norm
 from spade.agent import Agent
+import spade
 import time
 
-def cyclic_print(agent):
+async def cyclic_print(agent):
     print('count: {}'.format(agent.counter))
 
 def no_even_nums_cond_fn(agent):
@@ -18,7 +19,7 @@ def no_even_nums_cond_fn(agent):
 
 class CyclicPrintBehaviour(CyclicBehaviour):
     async def run(self):
-        self.agent.normative.perform('print')
+        await self.agent.normative.perform('print')
         time.sleep(2)
         self.agent.counter += 1
 
@@ -31,7 +32,7 @@ class PrinterAgent(NormativeMixin, Agent):
     async def setup(self):
         self.add_behaviour(CyclicPrintBehaviour())
 
-if __name__ == '__main__':
+async def main():
     '''
     Example about how norms affect normative agents' behaviour
     '''
@@ -51,11 +52,7 @@ if __name__ == '__main__':
     ag.normative.add_action(act)
 
     #6 start agent
-    ag.start()
-    time.sleep(3)
-    while ag.is_alive():
-        try:
-            time.sleep(1)
-        except KeyboardInterrupt:
-            ag.stop()            
-            break
+    await ag.start()
+
+if __name__ == '__main__':
+    spade.run(main())

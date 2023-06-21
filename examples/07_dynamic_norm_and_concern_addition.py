@@ -6,12 +6,14 @@ from spade.behaviour import CyclicBehaviour
 from spade_norms.norms.norm import Norm
 from spade.agent import Agent
 from enum import Enum
+import threading
+import spade
 import time
 
 class Domain(Enum):
     NUMBERS=1
 
-def cyclic_print(agent):
+async def cyclic_print(agent):
     print('count: {}'.format(agent.counter))
 
 def no_even_nums_cond_fn(agent):
@@ -28,12 +30,13 @@ def no_three_multipliers_cond_fn(agent):
 
 class CyclicPrintBehaviour(CyclicBehaviour):
     async def run(self):
-        self.agent.normative.perform('print')
+        await self.agent.normative.perform('print')
         time.sleep(2)
         self.agent.counter += 1
         no_three_mul_nums = Norm('no-three-multipliers-nums', NormType.PROHIBITION, no_three_multipliers_cond_fn, inviolable=False, domain=Domain.NUMBERS)
         if self.agent.counter > 6 and not self.agent.normative.contains_concern(no_three_mul_nums):
             #The agent updates its own concerns and does not modify the normative engine, so this norm it's only for itself
+            no_three_mul_nums = Norm('no-three-multipliers-nums', NormType.PROHIBITION, no_three_multipliers_cond_fn, inviolable=False, domain=Domain.NUMBERS)
             self.agent.normative.add_concern(no_three_mul_nums)
             print('CONCERN ADDED: no_three_mul_nums')
 
@@ -46,7 +49,19 @@ class PrinterAgent(NormativeMixin, Agent):
     async def setup(self):
         self.add_behaviour(CyclicPrintBehaviour())
 
-if __name__ == '__main__':
+def loop(ag, normative_engine, no_even_nums):
+    time.sleep(3)
+    while ag.is_alive():
+        try:
+            time.sleep(1)
+            if ag.counter >= 3 and not normative_engine.contains_norm(no_even_nums):
+                normative_engine.add_norm(no_even_nums)
+                print('NORM ADDED: no_even_nums')
+        except KeyboardInterrupt:
+            ag.stop()            
+            break
+
+async def main():
     '''
     This example follows the same structure as 06_dynamic_norm_addition. But in this case, we add a norm to the agent (concern) so this will only affect its behaviour, not the behaviour of all the agents.
     '''
@@ -55,7 +70,6 @@ if __name__ == '__main__':
 
     #2 create norm
     no_even_nums = Norm('no-even-nums', NormType.PROHIBITION, no_even_nums_cond_fn, inviolable=False, domain=Domain.NUMBERS)
-    no_three_mul_nums = Norm('no-three-multipliers-nums', NormType.PROHIBITION, no_three_multipliers_cond_fn, inviolable=False, domain=Domain.NUMBERS)
 
     #3 create normative engine
     normative_engine = NormativeEngine()
@@ -67,15 +81,11 @@ if __name__ == '__main__':
     #5 add action to agent
     ag.normative.add_action(act)
 
+    t = threading.Thread(target=loop, args=(ag, normative_engine, no_even_nums))
+    t.start()
+
     #6 start agent
-    ag.start()
-    time.sleep(3)
-    while ag.is_alive():
-        try:
-            time.sleep(1)
-            if ag.counter >= 3 and not normative_engine.contains_norm(no_even_nums):
-                normative_engine.add_norm(no_even_nums)
-                print('NORM ADDED: no_even_nums')
-        except KeyboardInterrupt:
-            ag.stop()            
-            break
+    await ag.start()
+
+if __name__ == '__main__':
+    spade.run(main())

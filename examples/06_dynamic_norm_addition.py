@@ -6,12 +6,14 @@ from spade.behaviour import CyclicBehaviour
 from spade_norms.norms.norm import Norm
 from spade.agent import Agent
 from enum import Enum
+import threading
+import spade
 import time
 
 class Domain(Enum):
     NUMBERS=1
 
-def cyclic_print(agent):
+async def cyclic_print(agent):
     print('count: {}'.format(agent.counter))
 
 def no_even_nums_cond_fn(agent):
@@ -28,12 +30,12 @@ def no_three_multipliers_cond_fn(agent):
 
 class CyclicPrintBehaviour(CyclicBehaviour):
     async def run(self):
-        self.agent.normative.perform('print')
+        await self.agent.normative.perform('print')
         time.sleep(2)
         self.agent.counter += 1
         no_three_mul_nums = Norm('no-three-multipliers-nums', NormType.PROHIBITION, no_three_multipliers_cond_fn, inviolable=False, domain=Domain.NUMBERS)
-        if self.agent.counter > 6 and not normative_engine.contains_norm(no_three_mul_nums):
-            normative_engine.add_norm(no_three_mul_nums)
+        if self.agent.counter > 6 and not self.agent.normative.normative_engine.contains_norm(no_three_mul_nums):
+            self.agent.normative.normative_engine.add_norm(no_three_mul_nums)
             print('no_three_mul_nums norm added')
 
 class PrinterAgent(NormativeMixin, Agent):
@@ -45,7 +47,19 @@ class PrinterAgent(NormativeMixin, Agent):
     async def setup(self):
         self.add_behaviour(CyclicPrintBehaviour())
 
-if __name__ == '__main__':
+def loop(ag, normative_engine, no_even_nums):
+    time.sleep(3)
+    while ag.is_alive():
+        try:
+            time.sleep(1)
+            if ag.counter > 3 and not normative_engine.contains_norm(no_even_nums):
+                normative_engine.add_norm(no_even_nums)
+                print('no_even_nums norm added')
+        except KeyboardInterrupt:
+            ag.stop()            
+            break
+
+async def main():
     '''
     Example with dynamic norm addition to normative engine
     '''
@@ -54,7 +68,6 @@ if __name__ == '__main__':
 
     #2 create norm
     no_even_nums = Norm('no-even-nums', NormType.PROHIBITION, no_even_nums_cond_fn, inviolable=False, domain=Domain.NUMBERS)
-    no_three_mul_nums = Norm('no-three-multipliers-nums', NormType.PROHIBITION, no_three_multipliers_cond_fn, inviolable=False, domain=Domain.NUMBERS)
 
     #3 create normative engine
     normative_engine = NormativeEngine()
@@ -65,17 +78,12 @@ if __name__ == '__main__':
     
     #5 add action to agent
     ag.normative.add_action(act)
+    
+    t = threading.Thread(target=loop, args=(ag, normative_engine, no_even_nums))
+    t.start()
 
     #6 start agent
-    ag.start()
-    time.sleep(3)
-    while ag.is_alive():
-        try:
-            time.sleep(1)
-            if ag.counter > 3 and not normative_engine.contains_norm(no_even_nums):
-                normative_engine.add_norm(no_even_nums)
-                print('no_even_nums norm added')
-            print(normative_engine.norm_db)
-        except KeyboardInterrupt:
-            ag.stop()            
-            break
+    await ag.start()
+
+if __name__ == '__main__':
+    spade.run(main())

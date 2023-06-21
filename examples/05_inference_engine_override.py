@@ -8,6 +8,7 @@ from spade.behaviour import CyclicBehaviour
 from spade_norms.norms.norm import Norm
 from spade.agent import Agent
 from enum import Enum
+import spade
 import time
 
 # create class wich inherits from NormativeReasoningEngine and override inference method.
@@ -32,7 +33,7 @@ class Role(Enum):
     EVEN_HATER = 0
     THREE_HATER = 1
 
-def cyclic_print(agent):
+async def cyclic_print(agent):
     print('count: {}'.format(agent.counter))
 
 def no_even_nums_cond_fn(agent):
@@ -49,7 +50,7 @@ def no_three_multipliers_cond_fn(agent):
 
 class CyclicPrintBehaviour(CyclicBehaviour):
     async def run(self):
-        self.agent.normative.perform('print')
+        await self.agent.normative.perform('print')
         time.sleep(2)
         self.agent.counter += 1
 
@@ -62,7 +63,7 @@ class PrinterAgent(NormativeMixin, Agent):
     async def setup(self):
         self.add_behaviour(CyclicPrintBehaviour())
 
-if __name__ == '__main__':
+async def main():
     '''
     Example of how to override norm compliance decision making process.
     '''
@@ -71,10 +72,10 @@ if __name__ == '__main__':
 
     #2 create norm
     no_even_nums = Norm('no-even-nums', NormType.PROHIBITION, no_even_nums_cond_fn, inviolable=False, domain=Domain.NUMBERS, roles=[Role.EVEN_HATER])
-    no_prime_nums = Norm('no-three-multipliers-nums', NormType.PROHIBITION, no_three_multipliers_cond_fn, inviolable=False, domain=Domain.NUMBERS, roles=[Role.EVEN_HATER, Role.THREE_HATER])
+    no_three_mul = Norm('no-three-multipliers-nums', NormType.PROHIBITION, no_three_multipliers_cond_fn, inviolable=False, domain=Domain.NUMBERS, roles=[Role.EVEN_HATER, Role.THREE_HATER])
 
     #3 create normative engine
-    normative_engine = NormativeEngine(norm_list= [no_even_nums, no_prime_nums])
+    normative_engine = NormativeEngine(norm_list= [no_even_nums, no_three_mul])
 
     #4 create custom reasoning engine
     reckless_reasoning_engine = RecklessReasoningEngine()
@@ -87,11 +88,7 @@ if __name__ == '__main__':
         actions = [act])
 
     #6 start agent
-    ag.start()
-    time.sleep(3)
-    while ag.is_alive():
-        try:
-            time.sleep(1)
-        except KeyboardInterrupt:
-            ag.stop()            
-            break
+    await ag.start()
+
+if __name__ == '__main__':
+    spade.run(main())

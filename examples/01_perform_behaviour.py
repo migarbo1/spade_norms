@@ -2,14 +2,15 @@ from spade_norms.actions.normative_action import NormativeAction
 from spade_norms.spade_norms import NormativeMixin
 from spade.agent import Agent
 from spade.behaviour import CyclicBehaviour
+import spade
 import time
 
-def cyclic_print(agent):
+async def cyclic_print(agent):
     print('count: {}'.format(agent.counter))
 
 class CyclicPrintBehaviour(CyclicBehaviour):
     async def run(self):
-        self.agent.normative.perform('print')
+        await self.agent.normative.perform('print')
         time.sleep(2)
         self.agent.counter += 1
 
@@ -22,18 +23,14 @@ class PrinterAgent(NormativeMixin, Agent):
     async def setup(self):
         self.add_behaviour(CyclicPrintBehaviour())
 
-if __name__ == '__main__':
+async def main():
     '''
     Simple example of how to use the perform directive in normative agents
     '''
     act = NormativeAction('print', cyclic_print)
     ag = PrinterAgent("migarbo1_printer@gtirouter.dsic.upv.es", "test") 
     ag.normative.add_action(act)
-    ag.start()
-    time.sleep(3)
-    while ag.is_alive():
-        try:
-            time.sleep(1)
-        except KeyboardInterrupt:
-            ag.stop()            
-            break
+    await ag.start()
+
+if __name__ == '__main__':
+    spade.run(main())
