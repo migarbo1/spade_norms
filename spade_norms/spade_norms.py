@@ -50,7 +50,7 @@ class NormativeComponent:
                 print("Error performing action: ", sys.exc_info()[0])
         else:
             #TODO: proceeding for actions not performed
-            print("Action {} not performed due to normative constrictions".format(action_name))
+            print("[{}]: Action {} not performed due to normative constrictions".format(self.agent.jid, action_name))
 
     def __check_exists(self, action_name: str):
         if self.actions.get(action_name, None) == None:

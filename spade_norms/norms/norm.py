@@ -5,7 +5,7 @@ from typing import Callable
 class Norm():
     def __init__(self ,name: str, norm_type: NormType, condition_fn: Callable, activation_fn: Callable = None, 
                 is_active: bool = True, reward: float = 1.0, penalty: float = -1.0, roles: list = [], 
-                domain: Enum = 0, inviolable: bool = True, issuer: NormIssuer = None):
+                domain: Enum = 0, inviolable: bool = True, issuer: NormIssuer = NormIssuer.ORGANIZATION):
         '''
         Creates an object of type norm given a norm `Name`, `NormType`, and a pointer to a `condition function`. 
         By default, if no furtherinformation is provided, norms will be `INVIOLABLE` and will affect all agents.
