@@ -63,8 +63,8 @@ def create_agents():
     normative_engine = NormativeEngine(norm_list= [no_rec_sending])
 
     #4 create agent with user, apssword and noramtive engine
-    ag1 = PrinterAgent("migarbo1_sender1@gtirouter.dsic.upv.es", "test", role = Role.SENDER)
-    ag2 = PrinterAgent("migarbo1_receiver1@gtirouter.dsic.upv.es", "test", role = Role.RECEIVER)
+    ag1 = PrinterAgent("sender1@your.xmpp.server", "test", role = Role.SENDER)
+    ag2 = PrinterAgent("receiver1@your.xmpp.server", "test", role = Role.RECEIVER)
 
     ag1.normative.set_normative_engine(normative_engine)
     ag2.normative.set_normative_engine(normative_engine)

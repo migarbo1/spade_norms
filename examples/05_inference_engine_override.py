@@ -81,7 +81,7 @@ async def main():
     reckless_reasoning_engine = RecklessReasoningEngine()
 
     #4 create agent with user, apssword and noramtive engine
-    ag = PrinterAgent("migarbo1_printer@gtirouter.dsic.upv.es", "test",
+    ag = PrinterAgent("printer@your.xmpp.server", "test",
         role = Role.THREE_HATER, 
         reasoning_engine = reckless_reasoning_engine, 
         normative_engine = normative_engine,

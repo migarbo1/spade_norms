@@ -28,7 +28,7 @@ async def main():
     Simple example of how to use the perform directive in normative agents
     '''
     act = NormativeAction('print', cyclic_print)
-    ag = PrinterAgent("migarbo1_printer@gtirouter.dsic.upv.es", "test") 
+    ag = PrinterAgent("printer@your.xmpp.server", "test") 
     ag.normative.add_action(act)
     await ag.start()
 

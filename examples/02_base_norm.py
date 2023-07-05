@@ -46,7 +46,7 @@ async def main():
     normative_engine = NormativeEngine(norm = no_even_nums)
 
     #4 create agent with user, apssword and noramtive engine
-    ag = PrinterAgent("migarbo1_printer@gtirouter.dsic.upv.es", "test")
+    ag = PrinterAgent("printer@your.xmpp.server", "test")
     ag.normative.set_normative_engine(normative_engine)
     #5 add action to agent
     ag.normative.add_action(act)
