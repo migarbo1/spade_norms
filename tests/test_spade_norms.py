@@ -7,6 +7,8 @@ import pytest
 
 from spade_norms import spade_norms
 
+#Factory_boy
+#conftest.py -> te permite definir fixtures (parametros a pasarle alos test si te hace falta) 
 
 @pytest.fixture
 def response():
@@ -22,3 +24,10 @@ def test_content(response):
     """Sample pytest test function with the pytest fixture as an argument."""
     # from bs4 import BeautifulSoup
     # assert 'GitHub' in BeautifulSoup(response.content).title.string
+
+# list of things to test:
+# file: spade_norms.py
+#   __check_exists() -> raise exception when action not found. Nothing otherwise
+#   add_action() -> adds action if not there
+#   add_action() -> updates action if there
+#
