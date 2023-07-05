@@ -104,7 +104,7 @@ SPADE Norms is a normative plugin meant to be used within Multi-Agent Systems th
 
 
 
-This example shows the power of this component. In it, by developing only a single agent model you can obtain two different behaviour due to the normative restrictions. Let's go step-by-step explaining all it's needed to know to develop this kind of systems.
+This example shows the power of this component. In it, by developing only a single agent model you can obtain two different behaviour due to the normative restrictions. Let's go step-by-step explaining all it's needed to develop this kind of systems.
 A norm is esentialy a restriction which describes when it is allowed or forbidden to perform a certain action. Norms are domain and role dependent so first of all we define both of them. In our case we have the domain Numbers and two roles: sender and receriver agents.
 What we need next is the condition of the norm. This is a function which returns ALLOWED or FORBIDDEN depending on the desired behaviour. 
 With the norm defined we then formalize the action that is going to be regulated. In this case we are controlling the communication between agents so we intercept the send method and place it inside this NormativeAction. This step is key, since the way actions are performed in this plugin differs from the regular spade implementation as we will discuss later.
