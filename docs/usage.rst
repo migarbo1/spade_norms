@@ -114,7 +114,7 @@ Now we can define our agent. We do so by creating two cyclic behaviour, one for 
 .. warning:: Remember that, when inheriting from Mixins, they MUST be always before the base class (``Agent``).
              E.g. ``class MyAgent(NormativeMixin, Agent):``
 
-Fynally, we have all the information needed to create our normative environment, so now we first create the normative action object and its corresponding norm. We use this norm to pass it to the normative engine constructor. With the normative engine created, we can create the instances of our agents. WIth the agents created we can add to them the actions that them can perform. And finally we can start the agents and see the behaviour.
+Finally, we have all the information needed to create our normative environment, so now we first create the normative action object and its corresponding norm. We use this norm to pass it to the normative engine constructor. With the normative engine created, we can create the instances of our agents. WIth the agents created we can add to them the actions that them can perform. And finally we can start the agents and see the behaviour.
 
 .. note:: Here we have used the two ways of adding a `normative_engine` to an agent. At the first example we have created the agent and then added the normative engine and at the second example we have passed directly the engine in the agent constructor. Same thing has been done with the actions.
 
