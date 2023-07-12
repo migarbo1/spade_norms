@@ -4,7 +4,11 @@ Usage
 .. note:: This is a plugin for the `SPADE <https://github.com/javipalanca/spade>`_ agent platform. Please visit the
           `SPADE's documentation <https://spade-mas.readthedocs.io>`_ to know more about this platform.
 
-SPADE Norms is a normative plugin meant to be used within Multi-Agent Systems that represent a normative environment. To understand better how it works, below is shown an example on how to build a MAS with normative restrictions::
+SPADE Norms is a normative plugin meant to be used within Multi-Agent Systems that represent a normative environment. To understand better how it works, below is shown an example on how to build a MAS with normative restrictions.
+
+This example shows the power of this component. In it, by developing only a single agent model you can obtain two different behaviour due to the normative restrictions. Let's go step-by-step explaining all it's needed to develop this kind of systems.
+
+First of all we include all the packages that we are going to need in order to develop the example. It is necesary to say that all of them can be compressed, but we have decided to import them explicitly to make clear each one of the components.::
 
     from spade_norms.norms.norm_enums import NormType, NormativeActionStatus
     from spade_norms.actions.normative_action import NormativeAction
@@ -19,6 +23,7 @@ SPADE Norms is a normative plugin meant to be used within Multi-Agent Systems th
     import asyncio
     import spade
 
+A norm is esentialy a restriction which describes when it is allowed or forbidden to perform a certain action. Norms are domain and role dependent so first of all we define both of them. In our case we have the domain Numbers and two roles: sender and receriver agents.::
 
     class Domain(Enum):
         NUMBERS = 1
@@ -28,10 +33,12 @@ SPADE Norms is a normative plugin meant to be used within Multi-Agent Systems th
         SENDER = 0
         RECEIVER = 1
 
+What we need next is the condition of the norm. This is a function which returns ALLOWED or FORBIDDEN depending on the desired behaviour. For our case, we want only the agents with role SENDER to send messages, so our function is defined as follows.::
 
     def only_sender_can_send(agent):
         return NormativeActionStatus.FORBIDDEN if agent.role == Role.RECEIVER else NormativeActionStatus.ALLOWED
 
+With the norm defined we then formalize the action that is going to be regulated. In this case we are controlling the communication between agents so we intercept the ``send`` method and place it inside this NormativeAction. This step is key, since the way actions are performed in this plugin differs from the regular spade implementation as we will discuss later. ::
 
     async def send_number(agent, behaviour, send_agent, recv_agent):
         msg = Message(
@@ -40,6 +47,8 @@ SPADE Norms is a normative plugin meant to be used within Multi-Agent Systems th
             metadata={"performative": "inform"},
         )
         await behaviour.send(msg)
+
+Now we can define our agent the same way we do it in regular SPADE. We do so by creating first two cyclic behaviours, one for sending the agent internal count and other for receiving and printing it to console. As this is regular SPADE code we won't mention it any deeper. ::
 
 
     class CyclicSendBehaviour(CyclicBehaviour):
@@ -56,6 +65,7 @@ SPADE Norms is a normative plugin meant to be used within Multi-Agent Systems th
                 print("{} received count: {}".format(self.agent.jid, msg.body))
             await asyncio.sleep(1)
 
+With the behaviours developed we create then the Normative Agent using the NormativeMixin. This mixin is what helds all the normative component and what will do the reasoning. ::
 
     class PrinterAgent(NormativeMixin, Agent):
         def __init__(self, *args, **kwargs):
@@ -68,6 +78,7 @@ SPADE Norms is a normative plugin meant to be used within Multi-Agent Systems th
             self.add_behaviour(CyclicSendBehaviour())
             self.add_behaviour(CyclicRecvBehaviour(), template)
 
+Finally, we have all the information needed to create our normative environment. To do so we first create the normative action object and the norm that regulates this environment. After that, we have to create the ``normative_engine`` wich will tell when it is allowed or forbidden to perform an action. We have used the previous norm as a parameter in the constructor but norms can be added later by using the method ``add_norm(Norm)`` or ``add_norms(list)``. With the normative engine created, we can create the instances of our agents. Here we show two ways of doing this, in the first we create the agent and then we dynamicaly add the normative engine; in the second one we do it all in once. Having the agents created we can tell them the actions that they can perform. And finally we start the agents and see the behaviour. ::
 
     async def main():
         # 1 create normative action
@@ -102,22 +113,13 @@ SPADE Norms is a normative plugin meant to be used within Multi-Agent Systems th
         await ag1.start()
         await ag2.start()
 
-
-
-This example shows the power of this component. In it, by developing only a single agent model you can obtain two different behaviour due to the normative restrictions. Let's go step-by-step explaining all it's needed to develop this kind of systems.
-A norm is esentialy a restriction which describes when it is allowed or forbidden to perform a certain action. Norms are domain and role dependent so first of all we define both of them. In our case we have the domain Numbers and two roles: sender and receriver agents.
-What we need next is the condition of the norm. This is a function which returns ALLOWED or FORBIDDEN depending on the desired behaviour. 
-With the norm defined we then formalize the action that is going to be regulated. In this case we are controlling the communication between agents so we intercept the send method and place it inside this NormativeAction. This step is key, since the way actions are performed in this plugin differs from the regular spade implementation as we will discuss later.
-
-Now we can define our agent. We do so by creating two cyclic behaviour, one for sending the agent internal count and other for receiving and printing it to console. As this is regular SPADE code we won't mention it any deeper. With the behaviours developed we create then the Normative Agent using the NormativeMixin.
-
 .. warning:: Remember that, when inheriting from Mixins, they MUST be always before the base class (``Agent``).
              E.g. ``class MyAgent(NormativeMixin, Agent):``
 
-Finally, we have all the information needed to create our normative environment, so now we first create the normative action object and its corresponding norm. We use this norm to pass it to the normative engine constructor. With the normative engine created, we can create the instances of our agents. WIth the agents created we can add to them the actions that them can perform. And finally we can start the agents and see the behaviour.
+
 
 .. note:: Here we have used the two ways of adding a `normative_engine` to an agent. At the first example we have created the agent and then added the normative engine and at the second example we have passed directly the engine in the agent constructor. Same thing has been done with the actions.
 
 .. warning:: This plugin is intented to be used with only one normative engine. All agent must share the same engine in order to be aware of the organization/environment norms. Nevertheless, it is not mandatory to place the same Normative Engine in all of them, in case that it is needed for them to have separate ones. But keep in mind that if the agents have different instances of normative engine, they will NOT share the same norms.
 
-This example will show in the terminal how the receiver agent can't send messages due to normative constrictions and the count that it has received from the sender agent. Under the ``examples/`` folder, more case scenarios can be found and there is explained how to dynamicaly add norms, remove them, override the reasoning engine...
+This example will show in the terminal how the receiver agent can't send messages due to normative constrictions and the count that it has received from the sender agent. Under the ``examples/`` folder inside the project, more case scenarios can be found explaining more complex things such as how to dynamicaly add norms, remove them, override the reasoning engine, etc.
