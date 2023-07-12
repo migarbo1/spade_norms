@@ -26,8 +26,11 @@ SPADE Normative Plugin
 Features
 --------
 
-* TODO
-
+* Extension for SPADE_ providing normative capabilities
+* Enables the development of agents that are norm aware
+* Computes before an agent performs an action whether it is allowed or not
+* Easy engine override of the core engines to customize the behaviour
+ 
 Credits
 -------
 
@@ -35,5 +38,6 @@ This package was created with Cookiecutter_ and the `audreyr/cookiecutter-pypack
 
 .. _Cookiecutter: https://github.com/audreyr/cookiecutter
 .. _`audreyr/cookiecutter-pypackage`: https://github.com/audreyr/cookiecutter-pypackage
+.. _SPADE: https://spade-mas.readthedocs.io/en/latest/readme.html
 
 installation and debug of plugin: https://stackoverflow.com/a/19048754
