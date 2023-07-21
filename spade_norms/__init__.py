@@ -2,7 +2,7 @@
 
 __author__ = """Miguel García"""
 __email__ = "migarbo1@upv.edu.es"
-__version__ = "0.1.0"
+__version__ = "__version__ = '0.1.1'"
 
 from .norms import *
 from .actions import *
