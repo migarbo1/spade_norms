@@ -36,7 +36,11 @@ A norm is esentialy a restriction which describes when it is allowed or forbidde
 What we need next is the condition of the norm. This is a function which returns ALLOWED or FORBIDDEN depending on the desired behaviour. For our case, we want only the agents with role SENDER to send messages, so our function is defined as follows.::
 
     def only_sender_can_send(agent):
-        return NormativeActionStatus.FORBIDDEN if agent.role == Role.RECEIVER else NormativeActionStatus.ALLOWED
+        return NormativeActionStatus.FORBIDDEN
+
+
+.. note:: Due to the nature of the engine, the norm will not be evaluated unless it is directed to the agent role so we can simply return a FORBIDDEN state for this example
+
 
 With the norm defined we then formalize the action that is going to be regulated. In this case we are controlling the communication between agents so we intercept the ``send`` method and place it inside this NormativeAction. This step is key, since the way actions are performed in this plugin differs from the regular spade implementation as we will discuss later. ::
 
@@ -86,12 +90,12 @@ Finally, we have all the information needed to create our normative environment.
 
         # 2 create norm
         no_rec_sending = Norm(
-            "no-even-nums",
-            NormType.PROHIBITION,
-            only_sender_can_send,
-            inviolable=False,
-            domain=Domain.NUMBERS,
-            roles=[Role.RECEIVER],
+            "no-even-nums",             # name of the norm
+            NormType.PROHIBITION,       # Type of the norm
+            only_sender_can_send,       # function with the condition of the norm
+            inviolable=False,           # flag to indicate if norm can be broken or not. (inviolable = False means that norm can be broken)
+            domain=Domain.NUMBERS,      # Domain in which the norm will be applied
+            roles=[Role.RECEIVER],      # Roles to which the norm will be applied
         )
 
         # 3 create normative engine
@@ -112,6 +116,11 @@ Finally, we have all the information needed to create our normative environment.
         # 6 start agent
         await ag1.start()
         await ag2.start()
+
+For completitude and due to the recent change in SPADE, launcher for this example will be as follows:
+    
+    if __name__ == "__main__":
+        spade.run(main())
 
 .. warning:: Remember that, when inheriting from Mixins, they MUST be always before the base class (``Agent``).
              E.g. ``class MyAgent(NormativeMixin, Agent):``
