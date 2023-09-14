@@ -13,8 +13,8 @@ import spade
 
 
 # create class wich inherits from NormativeReasoningEngine and override inference method.
-class RecklessReasoningEngine(NormativeReasoningEngine):
-    def inference(self, norm_response: NormativeResponse):
+class AdvancedReasoningEngine(NormativeReasoningEngine):
+    def inference(self, agent: Agent, norm_response: NormativeResponse):
         """
         this method overrides the previous inference behaviour and returns exactly the oposite.
         """
@@ -22,13 +22,13 @@ class RecklessReasoningEngine(NormativeReasoningEngine):
             norm_response.response_type == NormativeActionStatus.NOT_REGULATED
             or norm_response.response_type == NormativeActionStatus.ALLOWED
         ):
-            return False
+            return True
 
         if norm_response.response_type == NormativeActionStatus.INVIOLABLE:
-            return True
+            return agent.will > 0.85
 
         if norm_response.response_type == NormativeActionStatus.FORBIDDEN:
-            return True
+            return agent.will > 0.6
 
 
 class Domain(Enum):
@@ -60,15 +60,20 @@ def no_three_multipliers_cond_fn(agent):
 
 class CyclicPrintBehaviour(CyclicBehaviour):
     async def run(self):
-        await self.agent.normative.perform("print")
+        performed, _ = await self.agent.normative.perform("print")
         await asyncio.sleep(2)
         self.agent.counter += 1
+        if performed:
+            self.agent.will = 0.5
+        else:
+            self.agent.will += 0.1
 
 
 class PrinterAgent(NormativeMixin, Agent):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.counter = 0
+        self.will = 0.5
 
     async def setup(self):
         self.add_behaviour(CyclicPrintBehaviour())
@@ -77,6 +82,8 @@ class PrinterAgent(NormativeMixin, Agent):
 async def main():
     """
     Example of how to override norm compliance decision making process.
+    This new inference method will break the norms once it gets forbidden three times in a row.
+    For example 8, 9 and 10 are all forbidden, but the agent will print 10 either way
     """
     # 1 create normative action
     act = NormativeAction("print", cyclic_print, Domain.NUMBERS)
@@ -104,14 +111,14 @@ async def main():
     normative_engine = NormativeEngine(norm_list=[no_even_nums, no_three_mul])
 
     # 4 create custom reasoning engine
-    reckless_reasoning_engine = RecklessReasoningEngine()
+    advanced_reasoning_engine = AdvancedReasoningEngine()
 
     # 5 create agent with user, apssword and noramtive engine
     ag = PrinterAgent(
         "printer@your.xmpp.server",
         "test",
-        role=Role.THREE_HATER,
-        reasoning_engine=reckless_reasoning_engine,
+        role=Role.EVEN_HATER,
+        reasoning_engine=advanced_reasoning_engine,
         normative_engine=normative_engine,
         actions=[act],
     )
