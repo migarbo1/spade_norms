@@ -66,8 +66,8 @@ class NormativeComponent:
                 action_result = await self.actions[action_name].action_fn(
                     self.agent, *args, **kwargs
                 )
-                if action_result is not None:
-                    return action_result
+                return True, action_result
+                
             except Exception:
                 logging.error(traceback.format_exc())
                 print("Error performing action: ", sys.exc_info()[0])
@@ -78,6 +78,7 @@ class NormativeComponent:
                     self.agent.jid, action_name
                 )
             )
+        return False, None
 
     def __check_exists(self, action_name: str):
         if self.actions.get(action_name, None) is None:
@@ -91,7 +92,7 @@ class NormativeComponent:
             normative_response = self.normative_engine.check_legislation(
                 action, self.agent
             )
-            do_action = self.reasoning_engine.inference(normative_response)
+            do_action = self.reasoning_engine.inference(self.agent, normative_response)
         else:
             do_action = True
         return do_action
