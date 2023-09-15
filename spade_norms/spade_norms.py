@@ -54,6 +54,11 @@ class NormativeComponent:
         if len(actions) > 0:
             self.add_actions(actions)
 
+        self.agent.web.add_get("/norms", self.get_norms, "norms_templates/norms_template.html")
+
+    async def get_norms(self, request):
+        return {"norms": self.normative_engine}
+
     def set_normative_engine(self, normative_engine: NormativeEngine):
         """
         Overrides the agent's actual normative engine
@@ -70,7 +75,7 @@ class NormativeComponent:
                 )
                 cb_res_dict = await self.__compute_rewards_and_penalties(self.agent, n_response, do_action)
                 return True, action_result, cb_res_dict
-                
+
             except Exception:
                 logging.error(traceback.format_exc())
                 print("Error performing action: ", sys.exc_info()[0])
@@ -100,7 +105,7 @@ class NormativeComponent:
         else:
             do_action = True
         return do_action, normative_response
-    
+
     async def __compute_rewards_and_penalties(self, agent: Agent, n_resp: NormativeResponse, done: bool):
         callback_result_dict = {}
 
