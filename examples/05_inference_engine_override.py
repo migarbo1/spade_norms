@@ -60,7 +60,7 @@ def no_three_multipliers_cond_fn(agent):
 
 class CyclicPrintBehaviour(CyclicBehaviour):
     async def run(self):
-        performed, _ = await self.agent.normative.perform("print")
+        performed, _, _ = await self.agent.normative.perform("print")
         await asyncio.sleep(2)
         self.agent.counter += 1
         if performed:

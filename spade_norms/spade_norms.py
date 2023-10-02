@@ -5,6 +5,7 @@ from .actions.normative_action import NormativeAction
 from .engines.norm_engine import NormativeEngine
 from .norms.norm import Norm
 from .norms import norm_utils
+from .shared.utils import filter_kwargs
 from spade.agent import Agent
 from enum import Enum
 import traceback
@@ -60,13 +61,18 @@ class NormativeComponent:
         """
         self.normative_engine = normative_engine
 
-    async def perform(self, action_name: str, *args, **kwargs):
+    async def perform(self, action_name: str, **kwargs):
+        '''
+        Along all norms and actions each keyword argument must be unique!
+        All keyword aguments (norms + action) must be passed!
+        '''
         self.__check_exists(action_name)
-        do_action, n_response = self.__normative_eval(action_name)
+        do_action, n_response = self.__normative_eval(action_name, **kwargs)
         if do_action:
             try:
+                action_kwargs = filter_kwargs(self.actions[action_name].kwarg_names, kwargs) if kwargs else {}
                 action_result = await self.actions[action_name].action_fn(
-                    self.agent, *args, **kwargs
+                    self.agent, **action_kwargs
                 )
                 cb_res_dict = await self.__compute_rewards_and_penalties(self.agent, n_response, do_action)
                 return True, action_result, cb_res_dict
@@ -89,12 +95,12 @@ class NormativeComponent:
                 "Action with name {} does not exist in action dict".format(action_name)
             )
 
-    def __normative_eval(self, action_name):
+    def __normative_eval(self, action_name, **kwargs):
         action = self.actions[action_name]
         normative_response = None
         if self.normative_engine is not None:
             normative_response = self.normative_engine.check_legislation(
-                action, self.agent
+                action, self.agent, **kwargs
             )
             do_action = self.reasoning_engine.inference(self.agent, normative_response)
         else:

@@ -8,6 +8,7 @@ from ..norms.normative_response import NormativeResponse
 from ..norms.norm_enums import *
 from ..norms.norm import Norm
 from ..norms import norm_utils 
+from ..shared.utils import filter_kwargs
 from spade.agent import Agent
 
 class NormativeEngine():
@@ -31,7 +32,7 @@ class NormativeEngine():
     def remove_norm(self, norm: Norm) -> bool:
         self.norm_db = norm_utils.remove(self.norm_db, norm)
 
-    def check_legislation(self, action: NormativeAction, agent: Agent) -> NormativeResponse:
+    def check_legislation(self, action: NormativeAction, agent: Agent, **kwargs) -> NormativeResponse:
         '''
         This method checks the current norm database and for a given action returns if it is allowed or not in the form of a `NormativeResponse` object
         '''
@@ -44,7 +45,8 @@ class NormativeEngine():
             return normative_response
 
         for norm in appliable_norms:
-            cond_result = norm.condition_fn(agent)
+            norm_kwargs = filter_kwargs(norm.kwarg_names, kwargs) if kwargs else {}
+            cond_result = norm.condition_fn(agent, **norm_kwargs)
             assert isinstance(cond_result, NormativeActionStatus)
             
             if cond_result == NormativeActionStatus.FORBIDDEN or cond_result == NormativeActionStatus.INVIOLABLE:

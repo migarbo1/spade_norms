@@ -36,7 +36,7 @@ def only_sender_can_send(agent):
 
 class CyclicSendBehaviour(CyclicBehaviour):
     async def run(self):
-        await self.agent.normative.perform("send", self, self.agent, self.agent.recv)
+        await self.agent.normative.perform("send", behaviour=self, send_agent=self.agent, recv_agent=self.agent.recv)
         await asyncio.sleep(2)
         self.agent.counter += 1
 
@@ -63,7 +63,12 @@ class PrinterAgent(NormativeMixin, Agent):
 
 async def main():
     # 1 create normative action
-    act = NormativeAction("send", send_number, Domain.NUMBERS)
+    act = NormativeAction(
+        "send", 
+        send_number, 
+        Domain.NUMBERS, 
+        kwarg_names=['behaviour', 'send_agent', 'recv_agent']
+    )
 
     # 2 create norm
     no_rec_sending = Norm(

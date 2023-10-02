@@ -109,7 +109,7 @@ async def main():
 
     # 5 create agent with user, apssword and normative engine
     norm_breaker_agent = PrinterAgent(
-        "norm_breaker@gtirouter.dsic.upv.es",
+        "norm_breaker@your.xmpp.server",
         "test",
         role=Role.EVEN_HATER,
         reasoning_engine=advanced_reasoning_engine,
@@ -118,7 +118,7 @@ async def main():
     )
     # Note that this agent has the default normative engine
     norm_follower_agent = PrinterAgent(
-        "norm_follower@gtirouter.dsic.upv.es",
+        "norm_follower@your.xmpp.server",
         "test",
         role=Role.EVEN_HATER,
         normative_engine=normative_engine,
