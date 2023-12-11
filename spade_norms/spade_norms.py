@@ -1,3 +1,7 @@
+import os
+
+import aiohttp_jinja2
+
 from spade_norms.norms.norm_enums import *
 from .norms.normative_response import NormativeResponse
 from .engines.reasoning_engine import NormativeReasoningEngine
@@ -54,10 +58,15 @@ class NormativeComponent:
         if len(actions) > 0:
             self.add_actions(actions)
 
-        self.agent.web.add_get("/norms", self.get_norms, "norms_templates/norms_template.html")
+        template_path = os.path.dirname(__file__) + os.sep + "norms_templates"
+        self.agent.web.add_template_path(template_path)
+        self.agent.web.add_get("/spade/norms/", self.get_norms, "norms_template.html")
+        self.agent.web.add_menu_entry("Norms", "/spade/norms/", "fa fa-balance-scale")
+        jinja_env = aiohttp_jinja2.get_env(self.agent.web.app)
+        jinja_env.filters["function_to_string"] = norm_utils.function_to_string
 
     async def get_norms(self, request):
-        return {"norms": self.normative_engine}
+        return {"norms_db": self.normative_engine.norm_db}
 
     def set_normative_engine(self, normative_engine: NormativeEngine):
         """
@@ -73,7 +82,9 @@ class NormativeComponent:
                 action_result = await self.actions[action_name].action_fn(
                     self.agent, *args, **kwargs
                 )
-                cb_res_dict = await self.__compute_rewards_and_penalties(self.agent, n_response, do_action)
+                cb_res_dict = await self.__compute_rewards_and_penalties(
+                    self.agent, n_response, do_action
+                )
                 return True, action_result, cb_res_dict
 
             except Exception:
@@ -85,7 +96,9 @@ class NormativeComponent:
                     self.agent.jid, action_name
                 )
             )
-            cb_res_dict = await self.__compute_rewards_and_penalties(self.agent, n_response, do_action)
+            cb_res_dict = await self.__compute_rewards_and_penalties(
+                self.agent, n_response, do_action
+            )
         return False, None, cb_res_dict
 
     def __check_exists(self, action_name: str):
@@ -106,17 +119,27 @@ class NormativeComponent:
             do_action = True
         return do_action, normative_response
 
-    async def __compute_rewards_and_penalties(self, agent: Agent, n_resp: NormativeResponse, done: bool):
+    async def __compute_rewards_and_penalties(
+        self, agent: Agent, n_resp: NormativeResponse, done: bool
+    ):
         callback_result_dict = {}
 
         if n_resp != None:
-            for norm in n_resp.norms_forbidding: # Norms that evaluation forbidds action
-                if n_resp.response_type == NormativeActionStatus.FORBIDDEN or \
-                    n_resp.response_type == NormativeActionStatus.INVIOLABLE:
+            for (
+                norm
+            ) in n_resp.norms_forbidding:  # Norms that evaluation forbidds action
+                if (
+                    n_resp.response_type == NormativeActionStatus.FORBIDDEN
+                    or n_resp.response_type == NormativeActionStatus.INVIOLABLE
+                ):
                     if done:
-                        callback_result_dict[norm.name] = await self.__execute_penalty_callback(norm, agent)
+                        callback_result_dict[
+                            norm.name
+                        ] = await self.__execute_penalty_callback(norm, agent)
                     else:
-                        callback_result_dict[norm.name] = await self.__execute_reward_callback(norm, agent)
+                        callback_result_dict[
+                            norm.name
+                        ] = await self.__execute_reward_callback(norm, agent)
 
         return callback_result_dict
 
