@@ -11,6 +11,7 @@ from enum import Enum
 import asyncio
 import spade
 
+
 # create class wich inherits from NormativeReasoningEngine and override inference method.
 class AdvancedReasoningEngine(NormativeReasoningEngine):
     def inference(self, agent: Agent, norm_response: NormativeResponse):
@@ -61,6 +62,7 @@ async def reward_callback(agent):
     print(f"[{agent.jid}] rewarded for following rule. Counter increased")
     agent.counter += 10
 
+
 async def penalty_callback(agent):
     print(f"[{agent.jid}] punished for breaking rule. 3s of inactivity")
     await asyncio.sleep(3)
@@ -68,7 +70,7 @@ async def penalty_callback(agent):
 
 class CyclicPrintBehaviour(CyclicBehaviour):
     async def run(self):
-        performed, _, _  = await self.agent.normative.perform("print")
+        performed, _, _ = await self.agent.normative.perform("print")
         await asyncio.sleep(2)
         self.agent.counter += 1
 
