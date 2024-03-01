@@ -54,11 +54,35 @@ class NormativeComponent:
         if len(actions) > 0:
             self.add_actions(actions)
 
+        self.setup_web()
+        
+        if self.normative_engine:
+            self.trace_store.append(NormEventType.INIT, 'Normative agent created', f'Norms: {" ".join([n.name for n in self.normative_engine.get_norms()])}')
+
+    
+    def setup_web(self):
+        template_path = os.path.dirname(__file__) + os.sep + "norms_templates"
+        self.agent.web.add_template_path(template_path)
+        self.agent.web.add_get("/spade/norms/", self.get_norms, "norms_template.html")
+        # self.agent.web.add_get("/spade/norms/trace/", self.get_trace)
+        self.agent.web.add_menu_entry("Norms", "/spade/norms/", "fa fa-balance-scale")
+        jinja_env = aiohttp_jinja2.get_env(self.agent.web.app)
+        jinja_env.filters["function_to_string"] = norm_utils.function_to_string
+        
+
+    async def get_norms(self, request):
+        return {"norms_db": self.normative_engine.norm_db, "actions": self.actions,
+                "traces": self.trace_store.all()}
+
+    async def get_trace(self, request):
+        return {"traces": self.trace_store.all()}
+
     def set_normative_engine(self, normative_engine: NormativeEngine):
         """
         Overrides the agent's actual normative engine
         """
         self.normative_engine = normative_engine
+        self.trace_store.append(NormEventType.INIT, 'Normative agent created', f'Norms: {" ".join([n.name for n in self.normative_engine.get_norms()])}')
 
     async def perform(self, action_name: str, *args, **kwargs):
         self.__check_exists(action_name)
@@ -73,14 +97,12 @@ class NormativeComponent:
                 
             except Exception:
                 logging.error(traceback.format_exc())
-                print("Error performing action: ", sys.exc_info()[0])
+                self.trace_store.append(NormEventType.ERROR, action_name, f'{traceback.format_exc()}')
         else:
-            print(
-                "[{}]: Action {} not performed due to normative constrictions".format(
-                    self.agent.jid, action_name
-                )
+            self.trace_store.append(NormEventType.OMIT_ACTION, action_name)
+            cb_res_dict = await self.__compute_rewards_and_penalties(
+                self.agent, n_response, do_action
             )
-            cb_res_dict = await self.__compute_rewards_and_penalties(self.agent, n_response, do_action)
         return False, None, cb_res_dict
 
     def __check_exists(self, action_name: str):
@@ -96,9 +118,12 @@ class NormativeComponent:
             normative_response = self.normative_engine.check_legislation(
                 action, self.agent
             )
+            self.trace_store.append(NormEventType.NORM_EVALUATION, f'Action: {action_name}', f'Normative response: {normative_response.response_type.name}')
             do_action = self.reasoning_engine.inference(self.agent, normative_response)
+            self.trace_store.append(NormEventType.INFERENCE_RESULT, f'Action: {action_name}', f'{"Perform action" if do_action else "Do not perform action"}')
         else:
             do_action = True
+            self.trace_store.append(NormEventType.NORM_EVALUATION, f'Action: {action_name}', 'No engine provided. Perform action.')
         return do_action, normative_response
     
     async def __compute_rewards_and_penalties(self, agent: Agent, n_resp: NormativeResponse, done: bool):
@@ -116,12 +141,16 @@ class NormativeComponent:
         return callback_result_dict
 
     async def __execute_penalty_callback(self, norm: Norm, agent: Agent):
-        if norm.penalty_cb != None:
-            return await norm.penalty_cb(agent)
+        if norm.penalty_cb is not None:
+            result = await norm.penalty_cb(agent)
+            self.trace_store.append(NormEventType.PENALTY_CB, norm.name, str(result))
+            return result
 
     async def __execute_reward_callback(self, norm: Norm, agent: Agent):
-        if norm.reward_cb != None:
-            return await norm.reward_cb(agent)
+        if norm.reward_cb is not None:
+            result = await norm.reward_cb(agent)
+            self.trace_store.append(NormEventType.REWARD_CB, norm.name, str(result))
+            return result
 
     def add_action(self, action: NormativeAction):
         self.actions[action.name] = action
@@ -141,7 +170,8 @@ class NormativeComponent:
         self.concerns = norm_utils.add_multiple(self.concerns, concern_list)
 
     def contains_concern(self, concern: Norm) -> bool:
-        return norm_utils.contains(self.concerns, concern)
+        result = norm_utils.contains(self.concerns, concern)
+        return result
 
     def remove_concern(self, concern: Norm) -> bool:
         self.concerns = norm_utils.remove(self.concerns, concern)
