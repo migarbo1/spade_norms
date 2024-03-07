@@ -82,7 +82,7 @@ class A(NormativeMixin, Agent):
 
 
 async def main():
-    a = A("test@gtirouter.dsic.upv.es", "kakatua", verify_security=False, role=Role.SENDER)
+    a = A("test@your.xmpp.server", "kakatua", verify_security=False, role=Role.SENDER)
     act = NormativeAction("print", cyclic_print, domain=Domain.NUMBERS)
     act2 = NormativeAction("show_jid", action2, domain=Domain.NUMBERS)
     no_even_nums = Norm(

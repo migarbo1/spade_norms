@@ -40,7 +40,7 @@ class Role(Enum):
     THREE_HATER = 1
 
 
-async def cyclic_print(agent):
+async def cyclic_print(agent, _):
     print(f"[{agent.jid.localpart}] -> count: {agent.counter}")
 
 
@@ -58,19 +58,19 @@ def no_three_multipliers_cond_fn(agent):
     return NormativeActionStatus.ALLOWED
 
 
-async def reward_callback(agent):
+async def reward_callback(agent):#, rewards_kw):
     print(f"[{agent.jid}] rewarded for following rule. Counter increased")
-    agent.counter += 10
+    agent.counter += 10# rewards_kw['bonus']
 
 
-async def penalty_callback(agent):
+async def penalty_callback(agent):#, penalty_kw):
     print(f"[{agent.jid}] punished for breaking rule. 3s of inactivity")
-    await asyncio.sleep(3)
+    await asyncio.sleep(3)#penalty_kw['delay'])
 
 
 class CyclicPrintBehaviour(CyclicBehaviour):
     async def run(self):
-        performed, _, _ = await self.agent.normative.perform("print")
+        performed, _, _ = await self.agent.normative.perform("print")#, reward_kw={'bonus': 10}, penalty_kw={'delay': 3})
         await asyncio.sleep(2)
         self.agent.counter += 1
 
@@ -111,7 +111,7 @@ async def main():
 
     # 5 create agent with user, apssword and normative engine
     norm_breaker_agent = PrinterAgent(
-        "norm_breaker@gtirouter.dsic.upv.es",
+        "norm_breaker@your.xmpp.server",
         "test",
         role=Role.EVEN_HATER,
         reasoning_engine=advanced_reasoning_engine,
@@ -120,7 +120,7 @@ async def main():
     )
     # Note that this agent has the default normative engine
     norm_follower_agent = PrinterAgent(
-        "norm_follower@gtirouter.dsic.upv.es",
+        "norm_follower@your.xmpp.server",
         "test",
         role=Role.EVEN_HATER,
         normative_engine=normative_engine,
