@@ -1,4 +1,9 @@
+import os
+
+import aiohttp_jinja2
+
 from spade_norms.norms.norm_enums import *
+from .norms.norm_trace import NormTraceStore, NormEventType
 from .norms.normative_response import NormativeResponse
 from .engines.reasoning_engine import NormativeReasoningEngine
 from .actions.normative_action import NormativeAction
@@ -49,7 +54,7 @@ class NormativeComponent:
         self.reasoning_engine = (
             NormativeReasoningEngine() if reasoning_engine is None else reasoning_engine
         )
-
+        self.trace_store = NormTraceStore(10000)
         self.actions = {}
         if len(actions) > 0:
             self.add_actions(actions)
@@ -92,9 +97,14 @@ class NormativeComponent:
                 action_result = await self.actions[action_name].action_fn(
                     self.agent, *args, **kwargs
                 )
-                cb_res_dict = await self.__compute_rewards_and_penalties(self.agent, n_response, do_action)
+                self.trace_store.append(
+                    NormEventType.PERFORM_ACTION, action_name, str(action_result)
+                )
+                cb_res_dict = await self.__compute_rewards_and_penalties(
+                    self.agent, n_response, do_action
+                )
                 return True, action_result, cb_res_dict
-                
+
             except Exception:
                 logging.error(traceback.format_exc())
                 self.trace_store.append(NormEventType.ERROR, action_name, f'{traceback.format_exc()}')
@@ -125,18 +135,26 @@ class NormativeComponent:
             do_action = True
             self.trace_store.append(NormEventType.NORM_EVALUATION, f'Action: {action_name}', 'No engine provided. Perform action.')
         return do_action, normative_response
-    
-    async def __compute_rewards_and_penalties(self, agent: Agent, n_resp: NormativeResponse, done: bool):
+
+    async def __compute_rewards_and_penalties(
+        self, agent: Agent, n_resp: NormativeResponse, done: bool
+    ):
         callback_result_dict = {}
 
-        if n_resp != None:
-            for norm in n_resp.norms_forbidding: # Norms that evaluation forbidds action
-                if n_resp.response_type == NormativeActionStatus.FORBIDDEN or \
-                    n_resp.response_type == NormativeActionStatus.INVIOLABLE:
+        if n_resp is not None:
+            for norm in n_resp.norms_forbidding:  # Norms that evaluation forbids action
+                if (
+                    n_resp.response_type == NormativeActionStatus.FORBIDDEN
+                    or n_resp.response_type == NormativeActionStatus.INVIOLABLE
+                ):
                     if done:
-                        callback_result_dict[norm.name] = await self.__execute_penalty_callback(norm, agent)
+                        callback_result_dict[
+                            norm.name
+                        ] = await self.__execute_penalty_callback(norm, agent)
                     else:
-                        callback_result_dict[norm.name] = await self.__execute_reward_callback(norm, agent)
+                        callback_result_dict[
+                            norm.name
+                        ] = await self.__execute_reward_callback(norm, agent)
 
         return callback_result_dict
 
@@ -154,6 +172,7 @@ class NormativeComponent:
 
     def add_action(self, action: NormativeAction):
         self.actions[action.name] = action
+        self.trace_store.append(NormEventType.ADD_ACTION, action.name)
 
     def add_actions(self, action_list: list):
         for action in action_list:
@@ -162,12 +181,16 @@ class NormativeComponent:
     def delete_action(self, action: NormativeAction):
         self.__check_exists(action_name=action.name)
         self.actions.pop(action.name)
+        self.trace_store.append(NormEventType.REMOVE_ACTION, action.name)
 
     def add_concern(self, concern: Norm):
         self.concerns = norm_utils.add_single(self.concerns, concern)
+        self.trace_store.append(NormEventType.ADD_CONCERN, concern.name)
 
     def add_concerns(self, concern_list: list):
         self.concerns = norm_utils.add_multiple(self.concerns, concern_list)
+        for concern in concern_list:
+            self.trace_store.append(NormEventType.ADD_CONCERN, concern.name)
 
     def contains_concern(self, concern: Norm) -> bool:
         result = norm_utils.contains(self.concerns, concern)
@@ -175,3 +198,4 @@ class NormativeComponent:
 
     def remove_concern(self, concern: Norm) -> bool:
         self.concerns = norm_utils.remove(self.concerns, concern)
+        self.trace_store.append(NormEventType.REMOVE_CONCERN, concern.name)
