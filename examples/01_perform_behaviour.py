@@ -6,7 +6,7 @@ import asyncio
 import spade
 
 
-async def cyclic_print(agent, _):
+async def cyclic_print(agent):
     print("count: {}".format(agent.counter))
 
 

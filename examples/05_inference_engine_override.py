@@ -40,7 +40,7 @@ class Role(Enum):
     THREE_HATER = 1
 
 
-async def cyclic_print(agent, _):
+async def cyclic_print(agent):
     print("count: {}".format(agent.counter))
 
 

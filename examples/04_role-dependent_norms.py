@@ -21,8 +21,7 @@ class Role(Enum):
     RECEIVER = 1
 
 
-async def send_number(agent, action_kw):
-    behaviour, recv_agent = action_kw['behaviour'], action_kw['receiver']
+async def send_number(agent, behaviour, recv_agent):
     msg = Message(
         to=str(recv_agent.jid),
         body="{}".format(agent.counter),
@@ -37,8 +36,7 @@ def only_sender_can_send(agent):
 
 class CyclicSendBehaviour(CyclicBehaviour):
     async def run(self):
-        action_kw = {'behaviour': self, 'receiver': self.agent.recv}
-        await self.agent.normative.perform("send", action_kw)
+        await self.agent.normative.perform("send", action_kw = {'behaviour': self, 'recv_agent': self.agent.recv})
         await asyncio.sleep(2)
         self.agent.counter += 1
 

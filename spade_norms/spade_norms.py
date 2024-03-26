@@ -87,19 +87,19 @@ class NormativeComponent:
         self.normative_engine = normative_engine
         self.trace_store.append(NormEventType.INIT, 'Normative agent created', f'Norms: {" ".join([n.name for n in self.normative_engine.get_norms()])}')
 
-    async def perform(self, action_name: str, action_kw={}):#, reward_kw={}, penalty_kw={}):
+    async def perform(self, action_name: str, action_kw={}):
         self.__check_exists(action_name)
         do_action, n_response = self.__normative_eval(action_name)
         if do_action:
             try:
                 action_result = await self.actions[action_name].action_fn(
-                    self.agent, action_kw
+                    self.agent, **action_kw
                 )
                 self.trace_store.append(
                     NormEventType.PERFORM_ACTION, action_name, str(action_result)
                 )
                 cb_res_dict = await self.__compute_rewards_and_penalties(
-                    self.agent, n_response, do_action#, reward_kw, penalty_kw
+                    self.agent, n_response, do_action
                 )
                 return True, action_result, cb_res_dict
 
@@ -109,7 +109,7 @@ class NormativeComponent:
         else:
             self.trace_store.append(NormEventType.OMIT_ACTION, action_name)
             cb_res_dict = await self.__compute_rewards_and_penalties(
-                self.agent, n_response, do_action#, reward_kw, penalty_kw
+                self.agent, n_response, do_action
             )
         return False, None, cb_res_dict
 
@@ -134,7 +134,7 @@ class NormativeComponent:
             self.trace_store.append(NormEventType.NORM_EVALUATION, f'Action: {action_name}', 'No engine provided. Perform action.')
         return do_action, normative_response
     
-    async def __compute_rewards_and_penalties(self, agent: Agent, n_resp: NormativeResponse, done: bool):#, reward_kw:dict={}, penalty_kw:dict={}):
+    async def __compute_rewards_and_penalties(self, agent: Agent, n_resp: NormativeResponse, done: bool):
         callback_result_dict = {}
 
         if n_resp is not None:
@@ -144,21 +144,21 @@ class NormativeComponent:
                     or n_resp.response_type == NormativeActionStatus.INVIOLABLE
                 ):
                     if done:
-                        callback_result_dict[norm.name] = await self.__execute_penalty_callback(norm, agent)#, penalty_kw)
+                        callback_result_dict[norm.name] = await self.__execute_penalty_callback(norm, agent)
                     else:
-                        callback_result_dict[norm.name] = await self.__execute_reward_callback(norm, agent)#, reward_kw)
+                        callback_result_dict[norm.name] = await self.__execute_reward_callback(norm, agent)
 
         return callback_result_dict
 
-    async def __execute_penalty_callback(self, norm: Norm, agent: Agent):#, penalty_kw: dict = {}):
+    async def __execute_penalty_callback(self, norm: Norm, agent: Agent):
         if norm.penalty_cb is not None:
-            result = await norm.penalty_cb(agent)#, penalty_kw)
+            result = await norm.penalty_cb(agent)
             self.trace_store.append(NormEventType.PENALTY_CB, norm.name, str(result))
             return result
 
-    async def __execute_reward_callback(self, norm: Norm, agent: Agent):#, reward_kw: dict = {}):
+    async def __execute_reward_callback(self, norm: Norm, agent: Agent):
         if norm.reward_cb is not None:
-            result = await norm.reward_cb(agent)#, reward_kw)
+            result = await norm.reward_cb(agent)
             self.trace_store.append(NormEventType.REWARD_CB, norm.name, str(result))
             return result
 

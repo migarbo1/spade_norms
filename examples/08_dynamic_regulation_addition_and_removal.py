@@ -14,7 +14,7 @@ class Domain(Enum):
     NUMBERS = 1
 
 
-async def cyclic_print(agent, _):
+async def cyclic_print(agent):
     print("count: {}".format(agent.counter))
 
 
