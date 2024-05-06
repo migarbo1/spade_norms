@@ -59,6 +59,8 @@ class NormativeComponent:
 
         self.setup_web()
         
+        self.total_norms_broken = 0
+
         if self.normative_engine:
             self.trace_store.append(NormEventType.INIT, 'Normative agent created', f'Norms: {" ".join([n.name for n in self.normative_engine.get_norms()])}')
 
@@ -151,6 +153,7 @@ class NormativeComponent:
         return callback_result_dict
 
     async def __execute_penalty_callback(self, norm: Norm, agent: Agent):
+        self.total_norms_broken += 1
         if norm.penalty_cb is not None:
             result = await norm.penalty_cb(agent)
             self.trace_store.append(NormEventType.PENALTY_CB, norm.name, str(result))
