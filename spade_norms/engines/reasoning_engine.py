@@ -53,6 +53,5 @@ class ValueAwareNormativeReasoningEngine():
 
             # select action based on major probability density
             # higher value promotion means higher normative compliance
-            print('appraisal:', appraisal)
             return random.random() <= appraisal
             
