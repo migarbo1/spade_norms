@@ -1,4 +1,4 @@
-from spade_norms.engines.reasoning_engine import NormativeReasoningEngine
+from spade_norms.engines.reasoning_engine import ValueAwareNormativeReasoningEngine
 from spade_norms.norms.norm_enums import NormType, NormativeActionStatus
 from spade_norms.actions.normative_action import NormativeAction
 from spade_norms.engines.norm_engine import NormativeEngine
@@ -12,32 +12,14 @@ import asyncio
 import spade
 
 
-# create class wich inherits from NormativeReasoningEngine and override inference method.
-class AdvancedReasoningEngine(NormativeReasoningEngine):
-    def inference(self, agent: Agent, norm_response: NormativeResponse):
-        """
-        this method overrides the previous inference behaviour and returns exactly the oposite.
-        """
-        if (
-            norm_response.response_type == NormativeActionStatus.NOT_REGULATED
-            or norm_response.response_type == NormativeActionStatus.ALLOWED
-        ):
-            return True
-
-        if norm_response.response_type == NormativeActionStatus.INVIOLABLE:
-            return agent.will > 0.85
-
-        if norm_response.response_type == NormativeActionStatus.FORBIDDEN:
-            return agent.will > 0.6
+class DummyValues(Enum):
+    PRO_EVEN = 0
+    PRO_ODD = 1
+    PRO_PRIME = 2
 
 
 class Domain(Enum):
     NUMBERS = 1
-
-
-class Role(Enum):
-    EVEN_HATER = 0
-    THREE_HATER = 1
 
 
 async def cyclic_print(agent):
@@ -51,8 +33,8 @@ def no_even_nums_cond_fn(agent):
     return NormativeActionStatus.ALLOWED
 
 
-def no_three_multipliers_cond_fn(agent):
-    if agent.counter % 3 == 0:
+def only_primes_cond_fn(agent):
+    if agent.counter > 7 and (agent.counter % 2 == 0 or agent.counter % 3 == 0 or agent.counter % 5 == 0 or agent.counter % 7 == 0):
         return NormativeActionStatus.FORBIDDEN
 
     return NormativeActionStatus.ALLOWED
@@ -63,10 +45,6 @@ class CyclicPrintBehaviour(CyclicBehaviour):
         performed, _, _ = await self.agent.normative.perform("print")
         await asyncio.sleep(2)
         self.agent.counter += 1
-        if performed:
-            self.agent.will = 0.5
-        else:
-            self.agent.will += 0.1
 
 
 class PrinterAgent(NormativeMixin, Agent):
@@ -81,9 +59,10 @@ class PrinterAgent(NormativeMixin, Agent):
 
 async def main():
     """
-    Example of how to override norm compliance decision making process.
-    This new inference method will break the norms once it gets forbidden three times in a row.
-    For example 8, 9 and 10 are all forbidden, but the agent will print 10 either way
+    Example of how value aware normative decission process works.
+    System computes how much a norm promotes/demotes a value.
+    Based on that stablishes a probability of breaking the norm.
+    Feel free to test different combinations of values and weights to see how the behaviour changes.
     """
     # 1 create normative action
     act = NormativeAction("print", cyclic_print, Domain.NUMBERS)
@@ -95,32 +74,48 @@ async def main():
         no_even_nums_cond_fn,
         inviolable=False,
         domain=Domain.NUMBERS,
-        roles=[Role.EVEN_HATER],
+        promoting_values=[
+            DummyValues.PRO_ODD.name,
+            DummyValues.PRO_PRIME.name
+        ],
+        demoting_values=[
+            DummyValues.PRO_EVEN.name
+        ]
     )
 
-    no_three_mul = Norm(
-        "no-three-multipliers-nums",
+    only_primes = Norm(
+        "only-primes-nums",
         NormType.PROHIBITION,
-        no_three_multipliers_cond_fn,
+        only_primes_cond_fn,
         inviolable=False,
         domain=Domain.NUMBERS,
-        roles=[Role.EVEN_HATER, Role.THREE_HATER],
+        promoting_values=[
+            DummyValues.PRO_PRIME.name
+        ],
+        demoting_values=[
+            DummyValues.PRO_EVEN.name,
+            DummyValues.PRO_ODD.name,
+        ]
     )
 
     # 3 create normative engine
-    normative_engine = NormativeEngine(norm_list=[no_even_nums, no_three_mul])
+    normative_engine = NormativeEngine(norm_list=[no_even_nums, only_primes])
 
     # 4 create custom reasoning engine
-    advanced_reasoning_engine = AdvancedReasoningEngine()
+    advanced_reasoning_engine = ValueAwareNormativeReasoningEngine()
 
     # 5 create agent with user, apssword and noramtive engine
     ag = PrinterAgent(
         "printer@your.xmpp.server",
         "test",
-        role=Role.EVEN_HATER,
         reasoning_engine=advanced_reasoning_engine,
         normative_engine=normative_engine,
         actions=[act],
+        values={
+            DummyValues.PRO_EVEN.name: 0,
+            DummyValues.PRO_ODD.name: 1,
+            DummyValues.PRO_PRIME.name: 1
+        }
     )
 
     # 6 start agent

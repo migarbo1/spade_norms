@@ -38,17 +38,21 @@ class ValueAwareNormativeReasoningEngine():
             return False
 
         if norm_response.response_type == NormativeActionStatus.FORBIDDEN:
-            appraisal = 0
+            total_appraisal = 1
 
-            for norm in norm_response.norms_allowing:
+            for norm in norm_response.norms_forbidding:
                 # get normalized value weights taking into consideration both promoting and demoting values
-                value_weights = agent.get_averaged_values(norm.promoting_values + norm.demoting_values)
+                value_weights = agent.normative.get_averaged_values(norm.promoting_values + norm.demoting_values)
 
-                # accumulate promoting value weights
-                for pv in  norm.promoting_values:
-                    appraisal += value_weights[pv] 
+                # accumulate demoting value weights (promoting = 1-demoting, thus is implicit)
+                appraisal = 0
+                for dv in  norm.demoting_values:
+                    appraisal += value_weights[dv] 
+
+                total_appraisal *= appraisal # if appraisal == 1 means that it is really alligned with values. So we decide not to perform the action
 
             # select action based on major probability density
             # higher value promotion means higher normative compliance
-            return random.random() > appraisal
+            print('appraisal:', appraisal)
+            return random.random() <= appraisal
             

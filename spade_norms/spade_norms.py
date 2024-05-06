@@ -30,7 +30,7 @@ class NormativeMixin:
         super().__init__(*args, **kwargs)
         self.role = role
         self.normative = NormativeComponent(
-            self, normative_engine, reasoning_engine, actions, concerns
+            self, normative_engine, reasoning_engine, actions, concerns, values
         )
 
 
@@ -81,9 +81,9 @@ class NormativeComponent:
         weights = []
 
         for value in value_list:
-            weights.append(value)
+            weights.append(self.values.get(value, 0))
+            
         norm_weights = [w / sum(weights) for w in weights] 
-
         return dict(zip(value_list, norm_weights))
 
     
