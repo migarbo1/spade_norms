@@ -24,6 +24,7 @@ class NormativeMixin:
         reasoning_engine: NormativeReasoningEngine = None,
         actions: list = [],
         concerns: dict = {},
+        values: dict = {},
         **kwargs
     ):
         super().__init__(*args, **kwargs)
@@ -41,6 +42,7 @@ class NormativeComponent:
         reasoning_engine: NormativeReasoningEngine,
         actions: list = [],
         concerns: dict = {},
+        values: dict = {}
     ):
         """
         Creates a normative agent given a `NormativeEngine` and a `NormativeReasoningEngine`. If no `NormativeReasoningEngine` is provided the default is used.
@@ -57,12 +59,32 @@ class NormativeComponent:
         if len(actions) > 0:
             self.add_actions(actions)
 
+        self.values = values
+
         self.setup_web()
         
         self.total_norms_broken = 0
 
         if self.normative_engine:
             self.trace_store.append(NormEventType.INIT, 'Normative agent created', f'Norms: {" ".join([n.name for n in self.normative_engine.get_norms()])}')
+
+
+    def add_value(self, value_name, value_weight):
+        self.values[value_name] = value_weight
+
+    
+    def remove_value(self, value_name):
+        self.values.pop(value_name, None)
+
+
+    def get_averaged_values(self, value_list):
+        weights = []
+
+        for value in value_list:
+            weights.append(value)
+        norm_weights = [w / sum(weights) for w in weights] 
+
+        return dict(zip(value_list, norm_weights))
 
     
     def setup_web(self):
